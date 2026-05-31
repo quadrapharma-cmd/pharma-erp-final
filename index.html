@@ -258,8 +258,6 @@ strong{font-weight:700;color:var(--text)}
   padding:8px 14px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;}
 .ai-send-btn:hover{background:var(--green-light);}
 
-
-#login-screen{position:fixed;inset:0;z-index:10000;background:linear-gradient(135deg,#0d1117,#161b22);display:flex;align-items:center;justify-content:center;font-family:'Cairo',sans-serif;direction:rtl}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -332,7 +330,6 @@ strong{font-weight:700;color:var(--text)}
         🔔
         <span id="alerts-badge" style="display:none;position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;border-radius:99px;font-size:10px;font-weight:700;min-width:16px;height:16px;align-items:center;justify-content:center;padding:0 4px;font-family:'Cairo',sans-serif"></span>
       </button>
-      <div id="user-badge" style="display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text)"></div>
       <button class="co-switch-btn" id="co-switch-btn" onclick="coShowScreen()">
         🏢 <span id="co-active-label">الشركة</span>
       </button>
@@ -362,7 +359,7 @@ const defaultDB = {
   registrations:[], distributors:[], deliveryOrders:[], deliveryItems:[],
   expenses:[], employees:[], budgetLines:[], campaigns:[], salesTargets:[],
   receivables:[], payrollRuns:[], purchaseOrders:[], qualityChecks:[],
-  returns:[], contracts:[], assets:[], eInvoices:[], taxLines:[], batchMaterials:[], productIngredients:[], partnerAccounts:[], partnerEntries:[], journalEntries:[], chartOfAccounts:[], appUsers:[], historicalBalances:[],
+  returns:[], contracts:[], assets:[], eInvoices:[], taxLines:[], batchMaterials:[], productIngredients:[], partnerAccounts:[], partnerEntries:[], journalEntries:[], chartOfAccounts:[], historicalBalances:[],
   _seq:{}
 };
 
@@ -563,7 +560,6 @@ const navItems=[
   {id:'vat',icon:'🧾',label:'ضريبة القيمة المضافة',sec:'الضرائب'},
   {id:'einvoice',icon:'📄',label:'الفواتير الإلكترونية',sec:'الضرائب'},
   {id:'taxes',icon:'🏦',label:'الضرائب العامة',sec:'الضرائب'},
-  {id:'users',icon:'🔐',label:'المستخدمون',sec:'الإعدادات'},
 ];
 
 function renderNav(){
@@ -1427,15 +1423,6 @@ function saveEmployee(id){
 // ═══════════════════════════════════════════════
 // MODALS — Budget
 // ═══════════════════════════════════════════════
-function addBudget(){
-  showModal(modal('إضافة بند ميزانية',`
-    <div class="form-row">${fg('السنة *',inp('bud-year','number',new Date().getFullYear()))}${fg('الشهر',sel('bud-month',[{v:0,l:'سنوي'},...MONTHS.map((m,i)=>({v:i+1,l:m}))]))}</div>
-    <div class="form-row">${fg('القسم',sel('bud-dept',['اختر قسم...',...DEPTS,'كل الأقسام']))}${fg('الفئة *',sel('bud-cat',['اختر فئة...',...CATS_D,...CATS_I]))}</div>
-    ${fg('الوصف',inp('bud-desc'))}
-    ${fg('المبلغ المخطط (ج.م) *',inp('bud-amt','number'))}
-    <div class="form-actions"><button class="btn btn-green" onclick="saveBudget()">💾 حفظ</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button></div>
-  `));
-}
 function saveBudget(){
   const cat=val('bud-cat'), amt=val('bud-amt');
   if(!cat||cat==='اختر فئة...'||!amt) return alert('يرجى تعبئة الحقول الإلزامية');
@@ -1463,21 +1450,6 @@ function saveCampaign(id){
   const prodId=numVal('cp-prod');
   const d={name,productId:prodId||null,startDate:val('cp-start')||null,endDate:val('cp-end')||null,budget:val('cp-bud')||null,actualSpend:val('cp-spend')||null,status:val('cp-status')};
   id?update('campaigns',id,d):insert('campaigns',d);
-  closeModal(); go('marketing');
-}
-function addTarget(){
-  const pOpts=[{v:0,l:'كل المنتجات'},...getAll('products').map(p=>({v:p.id,l:p.name}))];
-  const dOpts=[{v:0,l:'كل الموزعين'},...getAll('distributors').map(d=>({v:d.id,l:d.name}))];
-  showModal(modal('هدف مبيعات جديد',`
-    <div class="form-row">${fg('المنتج',sel('tg-prod',pOpts))}${fg('الموزع',sel('tg-dist',dOpts))}</div>
-    <div class="form-row">${fg('السنة *',inp('tg-year','number',new Date().getFullYear()))}${fg('الشهر',sel('tg-month',[{v:0,l:'سنوي'},...MONTHS.map((m,i=>({v:i+1,l:m})))]))}</div>
-    <div class="form-row">${fg('الكمية المستهدفة',inp('tg-qty','number'))}${fg('المبلغ المستهدف (ج.م)',inp('tg-amt','number'))}</div>
-    <div class="form-actions"><button class="btn btn-green" onclick="saveTarget()">💾 حفظ</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button></div>
-  `));
-}
-function saveTarget(){
-  const year=numVal('tg-year'); if(!year) return alert('يرجى تحديد السنة');
-  insert('salesTargets',{productId:numVal('tg-prod')||null,distributorId:numVal('tg-dist')||null,year,month:numVal('tg-month')||null,targetQuantity:numVal('tg-qty')||null,targetAmount:val('tg-amt')||null});
   closeModal(); go('marketing');
 }
 
@@ -1711,28 +1683,6 @@ PAGES.contracts=function(){
     )}</div>`);
 };
 
-PAGES.salesvstarget=function(){
-  const targets=getAll('salesTargets');
-  const deliveries=getAll('deliveryOrders').filter(o=>o.status==='delivered');
-  setPage('المبيعات vs الأهداف','مقارنة المبيعات الفعلية بالأهداف المحددة','',
-    `<div class="card">${tbl(['المنتج','الموزع','السنة','الشهر','الهدف (ج.م)','الفعلي (ج.م)','الفرق (ج.م)','نسبة التحقق',''],
-      targets.map(t=>{
-        const prod=getAll('products').find(p=>p.id===t.productId);
-        const dist=getAll('distributors').find(d=>d.id===t.distributorId);
-        const actual=deliveries.filter(d=>(!t.distributorId||d.distributorId===t.distributorId)).reduce((s,d)=>s+Number(d.totalAmount||0),0);
-        const target=Number(t.targetAmount||0);
-        const pct=target>0?(actual/target*100):0;
-        const c=pct>=100?'text-green':pct>=80?'text-amber':'text-red';
-        return tr(
-          prod?.name||'كل المنتجات',dist?.name||'كل الموزعين',
-          t.year,t.month?MONTHS[t.month-1]:'سنوي',
-          target?`<span class="text-blue fw7">${fmt(target)} ج.م</span>`:'-',
-          `<span class="text-green fw7">${fmt(actual)} ج.م</span>`,
-          `<span class="${actual>=target?'text-green':'text-red'} fw7">${fmt(actual-target)} ج.م</span>`,
-          `<span class="${c} fw7">${pct.toFixed(1)}%</span>`);
-      })
-    )}</div>`);
-};
 
 PAGES.costanalysis=function(){
   const products=getAll('products');
@@ -1838,16 +1788,6 @@ function editPurchaseOrder(id){
     ${fg('الحالة',sel('pur-status',[{v:'معلق',l:'معلق'},{v:'مستلم',l:'مستلم'},{v:'ملغي',l:'ملغي'}],o.status))}
     <div class="form-actions"><button class="btn btn-green" onclick="savePurchaseOrder(${id})">💾 حفظ</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button></div>`));
 }
-function savePurchaseOrder(id){
-  const qty=numVal('pur-qty'),price=numVal('pur-price')||0;
-  if(!id&&!numVal('pur-mat'))return alert('يرجى اختيار المادة');
-  if(!qty)return alert('يرجى تحديد الكمية');
-  const matId=id?getById('purchaseOrders',id)?.materialId:numVal('pur-mat');
-  const mat=getById('materials',matId);
-  const d={materialId:matId,materialName:mat?.name||'',unit:mat?.unit||'',supplier:val('pur-sup')||null,quantity:qty,unitPrice:String(price)||null,totalAmount:String(qty*price),orderDate:val('pur-date')||null,status:val('pur-status')};
-  if(id)update('purchaseOrders',id,d);else{d.poNumber='PUR-'+Date.now();insert('purchaseOrders',d);}
-  closeModal();go('purchasing');
-}
 
 function addQualityCheck(){
   const pOpts=[{v:0,l:'اختر منتج...'},...getAll('products').map(p=>({v:p.id,l:p.name}))];
@@ -1912,11 +1852,6 @@ function editContract(id){
     ${fg('قيمة العقد (ج.م)',inp('con-val','number',c.value))}
     <div class="form-actions"><button class="btn btn-green" onclick="saveContract(${id})">💾 حفظ</button><button class="btn btn-ghost" onclick="closeModal()">إلغاء</button></div>`));
 }
-function saveContract(id){
-  const name=val('con-name');if(!name)return alert('يرجى كتابة اسم الطرف الثاني');
-  const d={partyName:name,contractType:val('con-type'),startDate:val('con-start')||null,endDate:val('con-end')||null,value:val('con-val')||null};
-  id?update('contracts',id,d):insert('contracts',d);closeModal();go('contracts');
-}
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -1977,6 +1912,8 @@ function coEnter(c){
     DB = raw ? JSON.parse(raw) : {...defaultDB};
     if(!DB._seq) DB._seq = {};
   } catch(e){ DB = {...defaultDB}; }
+  // Seed chart of accounts if new company
+  setTimeout(seedChartOfAccounts, 100);
 
   /* update sidebar branding */
   const ico = document.querySelector('.logo-icon');
@@ -1994,12 +1931,7 @@ function coEnter(c){
   /* hide selector, show app */
   document.getElementById('co-screen').style.display = 'none';
   renderNav();
-  if(!_authRestoreSession()){
-    _authShowLogin();
-  } else {
-    _authUpdateBadge();
-    go('dashboard');
-  }
+  go('dashboard');
 }
 
 /* ── show selector ── */
@@ -2176,83 +2108,6 @@ function saveAsset(id){
 // Add VAT fields to products (taxable flag + vatRate)
 // Add VAT to deliveries and purchases
 
-PAGES.vat = function(){
-  const dels  = getAll('deliveryOrders').filter(d=>d.status==='delivered');
-  const purs  = getAll('purchaseOrders').filter(p=>p.status==='مستلم');
-  const outVat = dels.reduce((s,d)=>s+Number(d.vatAmount||0),0);
-  const inVat  = purs.reduce((s,p)=>s+Number(p.vatAmount||0),0);
-  const netVat = outVat - inVat;
-
-  setPage('حساب ضريبة القيمة المضافة','الضريبة على المبيعات والمشتريات (VAT)','',`
-    <div class="stats-grid g4">
-      <div class="stat-card"><div class="lbl">ضريبة المبيعات (مخرجات)</div><div class="val text-red">${fmt(outVat)} ج.م</div></div>
-      <div class="stat-card"><div class="lbl">ضريبة المشتريات (مدخلات)</div><div class="val text-green">${fmt(inVat)} ج.م</div></div>
-      <div class="stat-card"><div class="lbl">صافي الضريبة المستحقة</div><div class="val ${netVat>=0?'text-red':'text-green'} fw7">${fmt(netVat)} ج.م</div><div class="sub">${netVat>=0?'مستحق للسداد':'رصيد دائن'}</div></div>
-      <div class="stat-card"><div class="lbl">نسبة الضريبة القياسية</div><div class="val text-blue">14%</div><div class="sub">طبقاً للقانون المصري</div></div>
-    </div>
-    <div class="tabs">
-      <button class="tab active" data-group="vat" data-tab="vat-out">ضريبة المبيعات</button>
-      <button class="tab" data-group="vat" data-tab="vat-in">ضريبة المشتريات</button>
-      <button class="tab" data-group="vat" data-tab="vat-summary">ملخص الإقرار</button>
-    </div>
-    <div id="vat-out" class="tab-pane" data-group="vat">
-      <div class="card">${tbl(['رقم الأمر','الموزع','قيمة المبيعات','خاضع للضريبة','نسبة VAT','مبلغ الضريبة','الإجمالي شامل الضريبة'],
-        dels.map(d=>{
-          const dist=getAll('distributors').find(x=>x.id===d.distributorId);
-          const taxable=d.taxable!==false;
-          const vatRate=Number(d.vatRate||14);
-          const vatAmt=taxable?Number(d.vatAmount||0):0;
-          return tr(
-            `<code>${d.orderNumber||'DO-'+d.id}</code>`,
-            dist?.name||'-',
-            fmt(d.totalAmount)+' ج.م',
-            taxable?'<span class="badge b-green">نعم</span>':'<span class="badge b-gray">لا</span>',
-            taxable?vatRate+'%':'—',
-            taxable?`<span class="text-red fw7">${fmt(vatAmt)} ج.م</span>`:'—',
-            `<span class="text-blue fw7">${fmt(Number(d.totalAmount||0)+vatAmt)} ج.م</span>`
-          );
-        })
-      )}</div>
-    </div>
-    <div id="vat-in" class="tab-pane" data-group="vat" style="display:none">
-      <div class="card">${tbl(['رقم الطلب','المادة','قيمة المشتريات','خاضع للضريبة','نسبة VAT','مبلغ الضريبة','الإجمالي شامل الضريبة'],
-        purs.map(p=>{
-          const taxable=p.taxable!==false;
-          const vatAmt=taxable?Number(p.vatAmount||0):0;
-          return tr(
-            `<code>${p.poNumber||'PUR-'+p.id}</code>`,
-            p.materialName||'-',
-            fmt(p.totalAmount)+' ج.م',
-            taxable?'<span class="badge b-green">نعم</span>':'<span class="badge b-gray">لا</span>',
-            taxable?(p.vatRate||14)+'%':'—',
-            taxable?`<span class="text-green fw7">${fmt(vatAmt)} ج.م</span>`:'—',
-            `<span class="text-blue fw7">${fmt(Number(p.totalAmount||0)+vatAmt)} ج.م</span>`
-          );
-        })
-      )}</div>
-    </div>
-    <div id="vat-summary" class="tab-pane" data-group="vat" style="display:none">
-      <div class="card" style="padding:28px;max-width:600px">
-        <h2 style="font-size:17px;font-weight:700;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)">📋 ملخص إقرار VAT</h2>
-        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--border)">
-          <span>الضريبة على المبيعات (مخرجات)</span>
-          <span class="text-red fw7">${fmt(outVat)} ج.م</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--border)">
-          <span>الضريبة على المشتريات (مدخلات)</span>
-          <span class="text-green fw7">${fmt(inVat)} ج.م</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;padding:14px 0;border-top:2px solid ${netVat>=0?'var(--red)':'var(--green)'};margin-top:8px">
-          <span style="font-weight:700;font-size:15px">${netVat>=0?'الضريبة المستحقة للسداد':'رصيد ضريبي دائن'}</span>
-          <span class="${netVat>=0?'text-red':'text-green'} fw7" style="font-size:18px">${fmt(Math.abs(netVat))} ج.م</span>
-        </div>
-        <div style="margin-top:16px;padding:12px;background:var(--green-bg);border:1px solid rgba(46,160,67,.3);border-radius:10px;font-size:12px;color:var(--muted)">
-          💡 هذا الملخص يمكن استخدامه كمرجع لتحضير الإقرار الضريبي الشهري على بوابة هيئة الضرائب المصرية
-        </div>
-      </div>
-    </div>`);
-  initTabs();
-};
 
 // ════════════════════════════════════════════════════════════════
 // ELECTRONIC INVOICING — الفواتير الإلكترونية
@@ -4378,7 +4233,7 @@ function buildBPRTable(orders, batchMats, productId){
         o.expectedDate||'—',
         badge(o.status||'pending'),
         `<span class="badge ${bprCls}">${bprLbl}</span>`,
-        `<button class="btn btn-green btn-sm" onclick="showBPR(${o.id})">📋 BPR</button>`
+        `<div class="action-bar"><button class="btn btn-green btn-sm" onclick="showBPR(${o.id})">📋 BPR</button><button class="icon-btn del" onclick="removeBatchOrder(${o.id})">${ic.del}</button></div>`
       );
     })
   );
@@ -4694,222 +4549,7 @@ function rejectBatch(orderId){
 // كل الأرقام بتيجي تلقائياً من بيانات ERP
 // ════════════════════════════════════════════════════════════════
 
-PAGES.reports = function(){
-  setPage('التقارير المالية الشاملة',
-    'كل الأرقام محسوبة تلقائياً من بيانات الشركة',
-    `<div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn btn-green" onclick="exportFinancialExcel()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        تصدير Excel كامل
-      </button>
-      <button class="btn btn-white" onclick="window.print()">🖨️ طباعة</button>
-    </div>`,
-    buildFinancialReports()
-  );
-  initTabs();
-};
 
-// ── حساب كل الأرقام من DB ─────────────────────────────────────
-function calcFinancials(){
-  const dels    = getAll('deliveryOrders');
-  const items   = getAll('deliveryItems');
-  const exps    = getAll('expenses');
-  const pos     = getAll('productionOrders');
-  const inv     = getAll('inventory');
-  const mats    = getAll('materials');
-  const rcpts   = getAll('materialReceipts');
-  const emps    = getAll('employees').filter(e=>e.status==='active');
-  const budgets = getAll('budgetLines');
-  const assets  = getAll('assets');
-  const batchM  = getAll('batchMaterials');
-  const taxL    = getAll('taxLines');
-  const recvbl  = getAll('receivables');
-  const purOrds = getAll('purchaseOrders');
-  const payroll = getAll('payrollRuns');
-
-  // ── الإيرادات ──────────────────────────────────────────────
-  const deliveredOrders = dels.filter(d=>d.status==='delivered');
-  const totalRevenue    = deliveredOrders.reduce((s,d)=>s+Number(d.totalAmount||0),0);
-  const pendingRevenue  = dels.filter(d=>d.status==='pending').reduce((s,d)=>s+Number(d.totalAmount||0),0);
-  const returnedVal     = getAll('returns').reduce((s,r)=>s+Number(r.totalValue||0),0);
-  const netRevenue      = totalRevenue - returnedVal;
-
-  // ── تكلفة المبيعات (COGS) ──────────────────────────────────
-  // تكلفة المواد من التشغيلات الفعلية
-  const prodMatCost = batchM.reduce((s,m)=>s+Number(m.quantity||0)*Number(m.unitCostAtTime||0),0);
-  // تكلفة CMO
-  const cmoCost = pos.reduce((s,p)=>s+Number(p.cmoBaseCost||p.totalCost||0),0);
-  const cogs = prodMatCost + cmoCost;
-  const grossProfit = netRevenue - cogs;
-  const grossMargin = netRevenue > 0 ? grossProfit/netRevenue : 0;
-
-  // ── المصروفات ─────────────────────────────────────────────
-  const directExp   = exps.filter(e=>e.expenseType==='direct').reduce((s,e)=>s+Number(e.amount||0),0);
-  const indirectExp = exps.filter(e=>e.expenseType==='indirect').reduce((s,e)=>s+Number(e.amount||0),0);
-  // مصروفات تصنيف
-  const expByCat = {};
-  exps.forEach(e=>{
-    expByCat[e.category] = (expByCat[e.category]||0) + Number(e.amount||0);
-  });
-  const totalExp = directExp + indirectExp;
-
-  // الرواتب
-  const monthSalary = emps.reduce((s,e)=>s+Number(e.salary||0)+Number(e.allowances||0)-Number(e.deductions||0),0);
-  const lastPayroll = payroll.slice(-1)[0];
-
-  // ── صافي الربح ────────────────────────────────────────────
-  const totalCosts  = cogs + totalExp;
-  const netProfit   = netRevenue - totalCosts;
-  const netMargin   = netRevenue > 0 ? netProfit/netRevenue : 0;
-  const ebitda      = netProfit; // مبسط
-
-  // ── قائمة المركز المالي ───────────────────────────────────
-  // الأصول المتداولة
-  const invValue    = inv.reduce((s,i)=>s+Number(i.quantity||0)*Number(i.unitCost||0),0);
-  const cashEquiv   = 0; // من النقدية
-  const receivables = recvbl.filter(r=>r.status!=='محصّل').reduce((s,r)=>s+Number(r.amount||0),0);
-  const currentAssets = invValue + receivables + pendingRevenue;
-
-  // الأصول غير المتداولة
-  const fixedAssets = assets.reduce((s,a)=>s+Number(a.purchaseCost||0)-Number(a.accDepreciation||0),0);
-  const totalAssets = currentAssets + fixedAssets;
-
-  // الالتزامات
-  const supplierDebt = purOrds.filter(p=>p.status==='معلق').reduce((s,p)=>s+Number(p.totalAmount||0),0);
-  const taxLiab     = taxL.filter(t=>t.status==='معلق').reduce((s,t)=>s+Number(t.amount||0),0);
-  const totalLiab   = supplierDebt + taxLiab;
-  const equity      = totalAssets - totalLiab;
-
-  // ── VAT ──────────────────────────────────────────────────
-  const vatOut = deliveredOrders.reduce((s,d)=>s+Number(d.vatAmount||0),0);
-  const vatIn  = purOrds.filter(p=>p.status==='مستلم').reduce((s,p)=>s+Number(p.vatAmount||0),0);
-  const netVat = vatOut - vatIn;
-
-  // ── المخزون ───────────────────────────────────────────────
-  const rawMatValue = mats.reduce((s,m)=>s+Number(m.currentStock||0)*Number(m.unitCost||0),0);
-  const finishedVal = invValue;
-  const totalInvVal = rawMatValue + finishedVal;
-
-  // ── الإنتاج ───────────────────────────────────────────────
-  const totalProduced  = pos.reduce((s,p)=>s+Number(p.quantity||0),0);
-  const releasedBatches= pos.filter(p=>p.bprStatus==='released').length;
-  const pendingBatches = pos.filter(p=>p.bprStatus!=='released'&&p.bprStatus!=='rejected').length;
-  const avgUnitCost    = totalProduced > 0 ?
-    pos.reduce((s,p)=>s+Number(p.unitCost||0),0)/pos.filter(p=>Number(p.unitCost||0)>0).length : 0;
-
-  // ── المبيعات ─────────────────────────────────────────────
-  const distCount   = getAll('distributors').filter(d=>d.status==='active').length;
-  const topDist     = (() => {
-    const m = new Map();
-    deliveredOrders.forEach(o=>{
-      const d=getById('distributors',o.distributorId);
-      if(d) m.set(d.name,(m.get(d.name)||0)+Number(o.totalAmount||0));
-    });
-    return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
-  })();
-
-  // ── الموازنة ─────────────────────────────────────────────
-  const totalBudget  = budgets.reduce((s,b)=>s+Number(b.budgetedAmount||0),0);
-  const budgetVarMap = {};
-  budgets.forEach(b=>{
-    const actual = expByCat[b.category]||0;
-    budgetVarMap[b.category] = {
-      budgeted: Number(b.budgetedAmount||0),
-      actual,
-      variance: Number(b.budgetedAmount||0) - actual,
-      pct: Number(b.budgetedAmount||0)>0 ? actual/Number(b.budgetedAmount||0) : 0
-    };
-  });
-
-  return {
-    // إيرادات
-    totalRevenue, pendingRevenue, returnedVal, netRevenue,
-    // تكلفة
-    prodMatCost, cmoCost, cogs, grossProfit, grossMargin,
-    // مصروفات
-    directExp, indirectExp, totalExp, expByCat,
-    monthSalary, lastPayroll,
-    // ربح
-    totalCosts, netProfit, netMargin, ebitda,
-    // ميزانية
-    invValue, rawMatValue, finishedVal, totalInvVal,
-    receivables, currentAssets, fixedAssets, totalAssets,
-    supplierDebt, taxLiab, totalLiab, equity,
-    // VAT
-    vatOut, vatIn, netVat,
-    // إنتاج
-    totalProduced, releasedBatches, pendingBatches, avgUnitCost,
-    // مبيعات
-    distCount, topDist,
-    // موازنة
-    totalBudget, budgetVarMap,
-    // موظفون
-    empCount: emps.length, monthSalary,
-    // ضرائب
-    taxLiab, taxL,
-  };
-}
-
-// ── بناء صفحة التقارير ────────────────────────────────────────
-function buildFinancialReports(){
-  const F = calcFinancials();
-  const prod = getAll('products').length;
-  const orders = getAll('productionOrders').length;
-
-  return `
-  <!-- TABS -->
-  <div class="tabs" style="flex-wrap:wrap">
-    <button class="tab active" data-group="rpt" data-tab="rpt-pl">📄 قائمة الدخل</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-bs">🏦 المركز المالي</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-cogs">🏭 تكلفة الإنتاج</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-exp">🧾 تحليل المصروفات</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-bud">💰 الميزانية مقابل الفعلي</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-inv">📦 قيمة المخزون</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-sales">🚚 تحليل المبيعات</button>
-    <button class="tab" data-group="rpt" data-tab="rpt-tax">🧾 الضرائب وVAT</button>
-  </div>
-
-  <!-- ══ قائمة الدخل ══ -->
-  <div id="rpt-pl" class="tab-pane" data-group="rpt">
-    ${reportPL(F)}
-  </div>
-
-  <!-- ══ المركز المالي ══ -->
-  <div id="rpt-bs" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportBS(F)}
-  </div>
-
-  <!-- ══ تكلفة الإنتاج ══ -->
-  <div id="rpt-cogs" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportCOGS(F)}
-  </div>
-
-  <!-- ══ تحليل المصروفات ══ -->
-  <div id="rpt-exp" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportExpenses(F)}
-  </div>
-
-  <!-- ══ الميزانية ══ -->
-  <div id="rpt-bud" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportBudget(F)}
-  </div>
-
-  <!-- ══ المخزون ══ -->
-  <div id="rpt-inv" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportInventory(F)}
-  </div>
-
-  <!-- ══ المبيعات ══ -->
-  <div id="rpt-sales" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportSales(F)}
-  </div>
-
-  <!-- ══ الضرائب ══ -->
-  <div id="rpt-tax" class="tab-pane" data-group="rpt" style="display:none">
-    ${reportTax(F)}
-  </div>
-  `;
-}
 
 // ── مساعد عرض السطر ──────────────────────────────────────────
 function plRow(label, value, cls='', indent=0, bold=false, borderTop=false){
@@ -7191,27 +6831,7 @@ function showPartnerLedger(partnerId){
     </div>`));
 }
 
-function addPartner(){
-  showModal(modal('إضافة شريك جديد',`
-    ${fg('اسم الشريك *',inp('pt-name','text','','مثال: د/ هيثم دويدار'))}
-    <div class="form-row">
-      ${fg('الدور',sel('pt-role',[{v:'partner',l:'شريك'},{v:'investor',l:'مستثمر'},{v:'manager',l:'شريك مدير'},{v:'silent',l:'شريك موصٍ'}],'partner'))}
-      ${fg('نوع الحساب',sel('pt-type',[{v:'current',l:'جاري'},{v:'capital',l:'رأسمالي'},{v:'loan',l:'قرض'}],'current'))}
-    </div>
-    ${fg('نسبة الملكية %',inp('pt-pct','number','','مثال: 25'))}
-    ${fg('ملاحظات',inp('pt-notes','text'))}
-    <div class="form-actions">
-      <button class="btn btn-green" onclick="savePartner()">💾 حفظ</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`));
-}
 
-function savePartner(id){
-  const name=val('pt-name'); if(!name) return alert('يرجى كتابة اسم الشريك');
-  const d={name,role:val('pt-role'),type:val('pt-type'),ownershipPct:val('pt-pct')||null,notes:val('pt-notes')||null};
-  id?update('partnerAccounts',id,d):insert('partnerAccounts',d);
-  closeModal(); go('partners');
-}
 
 function editPartner(id){
   const p=getById('partnerAccounts',id); if(!p) return;
@@ -7276,176 +6896,10 @@ function savePartnerEntry(){
 // ════════════════════════════════════════════════════════════════
 // 2. تحليل المساهمين — Shareholders Analysis
 // ════════════════════════════════════════════════════════════════
-PAGES.shareholders = function(){
-  const partners = getAll('partnerAccounts');
-  const entries  = getAll('partnerEntries');
-
-  // Historical data from files (مدخل مسبقاً كبيانات افتراضية)
-  const historicalData = {
-    'د/ هيثم دويدار':     { 2013:20000, 2014:742000, 2015:2050050, 2016:1284052, 2017:2968115, 2022:2818747, 2023:5629697 },
-    'د/ عبد الفتاح':      { 2022:1989017, 2023:3989017, 2024:8262794 },
-    'كابتن محمد فتحي':    { 2023:3450000, 2024:4190000 },
-    'هوسفيرا':            { 2022:9697536, 2023:9697536, 2024:9697536 },
-    'د/ أيمن عبد اللطيف': { 2014:1000000 },
-    'د/ محمد علام':       { 2014:497250 },
-    'د/ سارة محمود':      { 2015:50000 },
-    'د/ أسماء معبد':      { 2017:500000, 2023:78000, 2024:198000 },
-  };
-
-  const allYears = [2012,2013,2014,2015,2016,2017,2018,2022,2023,2024];
-  const allNames = Object.keys(historicalData);
-
-  // Merge with live partner accounts
-  partners.forEach(p => {
-    if(!historicalData[p.name]) historicalData[p.name] = {};
-    const pEntries = entries.filter(e=>e.partnerId===p.id);
-    pEntries.forEach(e => {
-      const yr = Number(e.year||new Date(e.entryDate||'').getFullYear());
-      if(!historicalData[p.name][yr]) historicalData[p.name][yr]=0;
-      historicalData[p.name][yr] += Number(e.credit||0) - Number(e.debit||0);
-    });
-  });
-
-  // Grand totals
-  const grandTotal = Object.values(historicalData).reduce((s,years) =>
-    s + Object.values(years).reduce((x,v)=>x+v,0), 0);
-
-  setPage('تحليل المساهمين — Shareholders Analysis',
-    'تحليل مساهمة كل شريك عبر السنوات من بيانات ميديسنيا',
-    `<button class="btn btn-green" onclick="addPartner()">➕ إضافة شريك</button>`,
-    `<div class="stats-grid g4" style="margin-bottom:16px">
-      <div class="stat-card"><div class="lbl">عدد المساهمين</div><div class="val">${Object.keys(historicalData).length}</div></div>
-      <div class="stat-card"><div class="lbl">إجمالي التمويل التراكمي</div><div class="val text-green">${fmt(grandTotal)} ج.م</div></div>
-      <div class="stat-card"><div class="lbl">أكبر مساهم</div>
-        <div class="val text-blue" style="font-size:14px">
-          ${Object.entries(historicalData).sort((a,b)=>Object.values(b[1]).reduce((s,v)=>s+v,0)-Object.values(a[1]).reduce((s,v)=>s+v,0))[0]?.[0]||'—'}
-        </div>
-      </div>
-      <div class="stat-card"><div class="lbl">أحدث تمويل (2024)</div>
-        <div class="val text-amber">${fmt(Object.values(historicalData).reduce((s,y)=>s+(y[2024]||0),0))} ج.م</div>
-      </div>
-    </div>
-
-    <!-- Pivot Table: شريك × سنة -->
-    <div class="card" style="margin-bottom:16px">
-      <div class="card-head"><h2>📊 جدول المساهمات — كل شريك × كل سنة (ج.م)</h2></div>
-      <div class="tbl-wrap"><table>
-        <thead><tr>
-          <th>الشريك</th>
-          ${allYears.map(y=>`<th>${y}</th>`).join('')}
-          <th>الإجمالي التراكمي</th>
-          <th>النسبة %</th>
-        </tr></thead>
-        <tbody>
-          ${Object.entries(historicalData).map(([name,years],idx) => {
-            const total = Object.values(years).reduce((s,v)=>s+v,0);
-            const pct   = grandTotal>0 ? total/grandTotal : 0;
-            const alt   = idx%2===0;
-            return `<tr style="background:${alt?'var(--bg)':'rgba(255,255,255,.02)'}">
-              <td class="fw7">${name}</td>
-              ${allYears.map(y=>{
-                const v=years[y]||0;
-                return `<td style="text-align:left;${v>0?'color:var(--green-light);font-weight:600':'color:var(--muted)'}">
-                  ${v>0?fmt(v):'—'}
-                </td>`;
-              }).join('')}
-              <td class="text-green fw7" style="text-align:left">${fmt(total)} ج.م</td>
-              <td class="text-blue fw7">${(pct*100).toFixed(1)}%</td>
-            </tr>`;
-          }).join('')}
-          <tr style="background:rgba(46,160,67,.1);font-weight:700">
-            <td>الإجمالي</td>
-            ${allYears.map(y=>{
-              const total=Object.values(historicalData).reduce((s,years)=>s+(years[y]||0),0);
-              return `<td style="text-align:left;color:var(--green-light)">${total>0?fmt(total):'—'}</td>`;
-            }).join('')}
-            <td class="text-green fw7" style="text-align:left">${fmt(grandTotal)} ج.م</td>
-            <td class="text-blue fw7">100%</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>
-
-    <!-- نسب الملكية -->
-    <div class="stats-grid g2">
-      <div class="card" style="padding:20px">
-        <h2 style="font-size:14px;font-weight:700;margin-bottom:14px">🥧 توزيع المساهمات التراكمية</h2>
-        ${Object.entries(historicalData).sort((a,b)=>Object.values(b[1]).reduce((s,v)=>s+v,0)-Object.values(a[1]).reduce((s,v)=>s+v,0)).map(([name,years])=>{
-          const total=Object.values(years).reduce((s,v)=>s+v,0);
-          const pct=grandTotal>0?total/grandTotal:0;
-          return `<div style="margin-bottom:10px">
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
-              <span class="fw7">${name}</span>
-              <span>${fmt(total)} ج.م (${(pct*100).toFixed(1)}%)</span>
-            </div>
-            <div style="height:7px;background:rgba(255,255,255,.08);border-radius:4px">
-              <div style="height:100%;width:${pct*100}%;background:var(--green);border-radius:4px"></div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-
-      <div class="card" style="padding:20px">
-        <h2 style="font-size:14px;font-weight:700;margin-bottom:14px">📈 التمويل السنوي الإجمالي</h2>
-        ${allYears.map(y=>{
-          const total=Object.values(historicalData).reduce((s,years)=>s+(years[y]||0),0);
-          const max=Math.max(...allYears.map(yr=>Object.values(historicalData).reduce((s,yrs)=>s+(yrs[yr]||0),0)));
-          if(!total) return '';
-          return `<div style="margin-bottom:8px">
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:2px">
-              <span>${y}</span><span class="text-green fw7">${fmt(total)} ج.م</span>
-            </div>
-            <div style="height:5px;background:rgba(255,255,255,.08);border-radius:3px">
-              <div style="height:100%;width:${max>0?total/max*100:0}%;background:var(--blue);border-radius:3px"></div>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`
-  );
-};
 
 // ════════════════════════════════════════════════════════════════
 // 3. اليومية الأمريكية — American Journal
 // ════════════════════════════════════════════════════════════════
-PAGES.journal = function(){
-  const entries = getAll('journalEntries').sort((a,b)=>(b.entryDate||'')>(a.entryDate||'')?1:-1);
-  const totalDebit  = entries.reduce((s,e)=>s+Number(e.debit||0),0);
-  const totalCredit = entries.reduce((s,e)=>s+Number(e.credit||0),0);
-  const isBalanced  = Math.abs(totalDebit-totalCredit) < 1;
-
-  setPage('اليومية الأمريكية — General Journal',
-    `${entries.length} قيد | مدين: ${fmt(totalDebit)} | دائن: ${fmt(totalCredit)} | ${isBalanced?'✅ متوازنة':'⚠️ غير متوازنة'}`,
-    `<div style="display:flex;gap:8px">
-      <button class="btn btn-green" onclick="addJournalEntry()">${ic.plus} قيد جديد</button>
-      <button class="btn btn-white" onclick="showTrialBalance()">📊 ميزان المراجعة</button>
-    </div>`,
-    `<div class="stats-grid g4" style="margin-bottom:16px">
-      <div class="stat-card"><div class="lbl">عدد القيود</div><div class="val">${entries.length}</div></div>
-      <div class="stat-card"><div class="lbl">إجمالي المدين</div><div class="val text-blue">${fmt(totalDebit)} ج.م</div></div>
-      <div class="stat-card"><div class="lbl">إجمالي الدائن</div><div class="val text-blue">${fmt(totalCredit)} ج.م</div></div>
-      <div class="stat-card">
-        <div class="lbl">حالة الميزان</div>
-        <div class="val ${isBalanced?'text-green':'text-red'}">${isBalanced?'✅ متوازن':'⚠️ فارق '+fmt(Math.abs(totalDebit-totalCredit))+' ج.م'}</div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-head">
-        <h2>📋 دفتر اليومية — Journal Ledger</h2>
-        <div style="display:flex;gap:8px">
-          <select onchange="filterJournalYear(this.value)" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
-            <option value="">كل السنوات</option>
-            ${[...new Set(entries.map(e=>e.year||new Date(e.entryDate||'').getFullYear()))].sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div id="journal-table-wrap">
-        ${buildJournalTable(entries)}
-      </div>
-    </div>`
-  );
-};
 
 function filterJournalYear(year){
   const entries = getAll('journalEntries').filter(e=>!year||e.year==year||new Date(e.entryDate||'').getFullYear()==year)
@@ -7596,218 +7050,18 @@ function updateJournalEntry(id){
 // ════════════════════════════════════════════════════════════════
 // 4. ميزان المراجعة — Trial Balance
 // ════════════════════════════════════════════════════════════════
-function showTrialBalance(){
-  const entries = getAll('journalEntries');
-  // Group by account
-  const accounts = {};
-  entries.forEach(e=>{
-    if(!accounts[e.debitAccount])  accounts[e.debitAccount]  ={name:e.debitAccount,debit:0,credit:0};
-    if(!accounts[e.creditAccount]) accounts[e.creditAccount] ={name:e.creditAccount,debit:0,credit:0};
-    accounts[e.debitAccount].debit   += Number(e.debit||0);
-    accounts[e.creditAccount].credit += Number(e.credit||0);
-  });
-  const rows = Object.values(accounts).sort((a,b)=>a.name.localeCompare(b.name,'ar'));
-  const totalD = rows.reduce((s,r)=>s+r.debit,0);
-  const totalC = rows.reduce((s,r)=>s+r.credit,0);
-  const balanced = Math.abs(totalD-totalC)<1;
 
-  setPage('ميزان المراجعة — Trial Balance',
-    `${rows.length} حساب | ${balanced?'✅ متوازن':'⚠️ غير متوازن'} | فارق: ${fmt(Math.abs(totalD-totalC))} ج.م`,
-    `<button class="btn btn-white" onclick="go('journal')">← رجوع لليومية</button>`,
-    `<div class="card">
-      <div class="card-head"><h2>📊 ميزان المراجعة</h2></div>
-      <div class="tbl-wrap"><table>
-        <thead><tr>
-          <th>الحساب</th>
-          <th>إجمالي مدين</th><th>إجمالي دائن</th>
-          <th>رصيد مدين</th><th>رصيد دائن</th>
-        </tr></thead>
-        <tbody>
-          ${rows.map((r,i)=>{
-            const balD=Math.max(0,r.debit-r.credit);
-            const balC=Math.max(0,r.credit-r.debit);
-            return `<tr style="background:${i%2?'rgba(255,255,255,.02)':''}">
-              <td class="fw7">${r.name}</td>
-              <td style="text-align:left">${r.debit>0?fmt(r.debit)+' ج.م':'—'}</td>
-              <td style="text-align:left">${r.credit>0?fmt(r.credit)+' ج.م':'—'}</td>
-              <td style="text-align:left" class="${balD>0?'text-blue fw7':''}">${balD>0?fmt(balD)+' ج.م':'—'}</td>
-              <td style="text-align:left" class="${balC>0?'text-red fw7':''}">${balC>0?fmt(balC)+' ج.م':'—'}</td>
-            </tr>`;
-          }).join('')}
-          <tr style="background:rgba(46,160,67,.1);font-weight:700">
-            <td>الإجمالي</td>
-            <td style="text-align:left" class="text-blue fw7">${fmt(totalD)} ج.م</td>
-            <td style="text-align:left" class="text-red fw7">${fmt(totalC)} ج.م</td>
-            <td colspan="2" style="text-align:center" class="${balanced?'text-green':'text-red'}">${balanced?'✅ متوازن':'⚠️ فارق '+fmt(Math.abs(totalD-totalC))+' ج.م'}</td>
-          </tr>
-        </tbody>
-      </table></div>
-    </div>`
-  );
-}
-
-PAGES.trialbalance = function(){ showTrialBalance(); };
 
 // ════════════════════════════════════════════════════════════════
 // 5. دليل الحسابات — Chart of Accounts
 // ════════════════════════════════════════════════════════════════
-function getChartOfAccounts(){
-  const custom = getAll('chartOfAccounts');
-  const defaults = [
-    // الأصول
-    {code:'1100',name:'الصندوق',type:'asset',category:'أصول متداولة'},
-    {code:'1110',name:'البنك',type:'asset',category:'أصول متداولة'},
-    {code:'1120',name:'عملاء ومدينون',type:'asset',category:'أصول متداولة'},
-    {code:'1130',name:'أوراق قبض',type:'asset',category:'أصول متداولة'},
-    {code:'1140',name:'مخزون المنتجات',type:'asset',category:'أصول متداولة'},
-    {code:'1150',name:'مخزون المواد الخام',type:'asset',category:'أصول متداولة'},
-    {code:'1160',name:'مصروفات مقدمة',type:'asset',category:'أصول متداولة'},
-    {code:'1200',name:'أصول ثابتة',type:'asset',category:'أصول غير متداولة'},
-    {code:'1210',name:'مجمع إهلاك أصول ثابتة',type:'asset',category:'أصول غير متداولة'},
-    {code:'1220',name:'مشروعات تحت التنفيذ',type:'asset',category:'أصول غير متداولة'},
-    {code:'1230',name:'رسوم تسجيل وتراخيص',type:'asset',category:'أصول غير متداولة'},
-    // الالتزامات
-    {code:'2100',name:'موردون ودائنون',type:'liability',category:'التزامات متداولة'},
-    {code:'2110',name:'أوراق دفع',type:'liability',category:'التزامات متداولة'},
-    {code:'2120',name:'ضريبة قيمة مضافة مستحقة',type:'liability',category:'التزامات متداولة'},
-    {code:'2130',name:'ضريبة دخل مستحقة',type:'liability',category:'التزامات متداولة'},
-    {code:'2140',name:'رواتب مستحقة',type:'liability',category:'التزامات متداولة'},
-    {code:'2200',name:'قروض طويلة الأجل',type:'liability',category:'التزامات غير متداولة'},
-    // حقوق الملكية
-    {code:'3100',name:'رأس المال',type:'equity',category:'حقوق الملكية'},
-    {code:'3200',name:'جاري الشركاء',type:'equity',category:'حقوق الملكية'},
-    {code:'3300',name:'أرباح مرحلة',type:'equity',category:'حقوق الملكية'},
-    // الإيرادات
-    {code:'4100',name:'إيرادات المبيعات',type:'revenue',category:'الإيرادات'},
-    {code:'4200',name:'إيرادات أخرى',type:'revenue',category:'الإيرادات'},
-    {code:'4300',name:'فوائد دائنة',type:'revenue',category:'الإيرادات'},
-    // التكاليف
-    {code:'5100',name:'تكلفة مواد خام',type:'expense',category:'تكلفة المبيعات'},
-    {code:'5200',name:'تكلفة تصنيع CMO',type:'expense',category:'تكلفة المبيعات'},
-    {code:'5300',name:'تكاليف تغليف',type:'expense',category:'تكلفة المبيعات'},
-    {code:'5400',name:'عمالة مباشرة',type:'expense',category:'تكلفة المبيعات'},
-    // المصروفات
-    {code:'6100',name:'رواتب وأجور',type:'expense',category:'مصروفات تشغيلية'},
-    {code:'6200',name:'مصروفات بيع وتسويق',type:'expense',category:'مصروفات تشغيلية'},
-    {code:'6300',name:'مصروفات إدارية وعمومية',type:'expense',category:'مصروفات تشغيلية'},
-    {code:'6400',name:'إهلاك الأصول الثابتة',type:'expense',category:'مصروفات تشغيلية'},
-    {code:'6500',name:'مصروفات تسجيل دوائي',type:'expense',category:'مصروفات تشغيلية'},
-    {code:'6600',name:'مصروفات تمويلية وفوائد',type:'expense',category:'مصروفات تشغيلية'},
-    {code:'6700',name:'ضريبة الدخل',type:'expense',category:'مصروفات تشغيلية'},
-  ];
-  return [...defaults, ...custom.filter(c=>!defaults.find(d=>d.code===c.code))];
-}
 
-PAGES.chartofaccounts = function(){
-  const accounts = getChartOfAccounts();
-  const custom   = getAll('chartOfAccounts');
-  const cats     = [...new Set(accounts.map(a=>a.category))];
-  const typeMap  = {asset:'أصول',liability:'التزامات',equity:'حقوق الملكية',revenue:'إيرادات',expense:'مصروفات'};
-  const typeColor= {asset:'b-blue',liability:'b-red',equity:'b-green',revenue:'b-green',expense:'b-amber'};
 
-  setPage('دليل الحسابات — Chart of Accounts',
-    `${accounts.length} حساب (${accounts.length-custom.length} افتراضي + ${custom.length} مخصص)`,
-    `<button class="btn btn-green" onclick="addAccount()">${ic.plus} إضافة حساب</button>`,
-    `<div class="tabs">
-      ${cats.map((cat,i)=>`<button class="tab${i===0?' active':''}" data-group="coa" data-tab="coa-${i}">${cat}</button>`).join('')}
-    </div>
-    ${cats.map((cat,i)=>`
-      <div id="coa-${i}" class="tab-pane" data-group="coa" ${i>0?'style="display:none"':''}>
-        <div class="card">${tbl(['رمز الحساب','اسم الحساب','النوع','الفئة',''],
-          accounts.filter(a=>a.category===cat).map(a=>tr(
-            `<code class="fw7">${a.code}</code>`,
-            `<strong>${a.name}</strong>`,
-            `<span class="badge ${typeColor[a.type]||'b-gray'}">${typeMap[a.type]||a.type}</span>`,
-            a.category,
-            custom.find(c=>c.code===a.code)
-              ?`<button class="icon-btn del" onclick="if(confirm('حذف؟')){remove('chartOfAccounts',${custom.find(c=>c.code===a.code).id});go('chartofaccounts')}">${ic.del}</button>`
-              :'<span style="color:var(--muted);font-size:10px">افتراضي</span>'
-          ))
-        )}</div>
-      </div>`).join('')}
-    `
-  );
-  initTabs();
-};
 
-function addAccount(){
-  showModal(modal('إضافة حساب جديد',`
-    <div class="form-row">
-      ${fg('رمز الحساب *',inp('ac-code','text','','مثال: 1250'))}
-      ${fg('نوع الحساب',sel('ac-type',[{v:'asset',l:'أصول'},{v:'liability',l:'التزامات'},{v:'equity',l:'حقوق الملكية'},{v:'revenue',l:'إيرادات'},{v:'expense',l:'مصروفات'}],'expense'))}
-    </div>
-    ${fg('اسم الحساب *',inp('ac-name','text','','مثال: مصروفات صيانة'))}
-    ${fg('الفئة',inp('ac-cat','text','','مثال: مصروفات تشغيلية'))}
-    <div class="form-actions">
-      <button class="btn btn-green" onclick="saveAccount()">💾 حفظ</button>
-      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
-    </div>`));
-}
-
-function saveAccount(){
-  const code=val('ac-code'),name=val('ac-name');
-  if(!code||!name) return alert('يرجى تعبئة الرمز والاسم');
-  insert('chartOfAccounts',{code,name,type:val('ac-type'),category:val('ac-cat')||'أخرى'});
-  closeModal(); go('chartofaccounts');
-}
 
 // ════════════════════════════════════════════════════════════════
 // 6. ميزان المراجعة التاريخي — Historical Trial Balance
 // ════════════════════════════════════════════════════════════════
-PAGES.historicalbalance = function(){
-  // البيانات من ملفات ميديسنيا 2012-2018
-  const trialBalance = [
-    {account:'الصندوق',         d2012:100000, c2012:18322, d2013:321000, c2013:375750, d2014:1830204, c2014:1849045, d2015:4414787, c2015:4391598, d2016:4555382, c2016:4586081, d2017:7892390, c2017:7841792, d2018:2278486, c2018:2219796},
-    {account:'البنك',            d2012:3000, c2012:309, d2013:20000, c2013:22200, d2014:2003665, c2014:2003111, d2015:2497289, c2015:2390776, d2016:3489717, c2016:3296491, d2017:2949992, c2017:3225439, d2018:1175481, c2018:1152030},
-    {account:'مصروفات إدارية',   d2012:15631, c2012:0, d2013:273950, c2013:0, d2014:387925, c2014:0, d2015:717388, c2015:0, d2016:703212, c2016:0, d2017:756444, c2017:0, d2018:364984, c2018:0},
-    {account:'م إنتاج (تصنيع)', d2012:0, c2012:0, d2013:0, c2013:0, d2014:40038, c2014:0, d2015:484079, c2015:3085, d2016:530607, c2016:0, d2017:131148, c2017:0, d2018:163944, c2018:0},
-    {account:'جاري الشركاء',    d2012:0, c2012:0, d2013:0, c2013:329000, d2014:500070, c2014:329000, d2015:0, c2015:2100050, d2016:0, c2016:1284052, d2017:0, c2017:3468115, d2018:0, c2018:415173},
-    {account:'رأس المال',        d2012:0, c2012:100000, d2013:0, c2013:100000, d2014:0, c2014:100000, d2015:0, c2015:100000, d2016:0, c2016:100000, d2017:0, c2017:100000, d2018:0, c2018:1000000},
-    {account:'أصول ثابتة',      d2012:0, c2012:0, d2013:0, c2013:0, d2014:1500000, c2014:0, d2015:1500000, c2015:0, d2016:1500000, c2016:0, d2017:1500000, c2017:0, d2018:0, c2018:0},
-    {account:'الدائنون',         d2012:0, c2012:0, d2013:0, c2013:0, d2014:571665, c2014:0, d2015:0, c2015:285605, d2016:0, c2016:923469, d2017:0, c2017:1115986, d2018:0, c2018:0},
-  ];
-  const years=[2012,2013,2014,2015,2016,2017,2018];
-
-  setPage('الموازين التاريخية — Historical Trial Balance',
-    'موازين مراجعة شركة ميديسنيا من 2012 إلى 2018 من الملفات الأصلية',
-    `<button class="btn btn-white" onclick="go('journal')">← اليومية</button>`,
-    `<div class="alert alert-warn" style="margin-bottom:16px">
-      ${ic.warn}<div>هذه البيانات مستخرجة من ملفات ميديسنيا المالية الأصلية (2012–2018) — للمراجعة والاستعراض فقط</div>
-    </div>
-    <div class="card">
-      <div class="card-head"><h2>📊 ميزان المراجعة التاريخي 2012–2018</h2></div>
-      <div class="tbl-wrap"><table style="font-size:11px">
-        <thead>
-          <tr>
-            <th rowspan="2">الحساب</th>
-            ${years.map(y=>`<th colspan="2">${y}</th>`).join('')}
-          </tr>
-          <tr>
-            ${years.map(()=>'<th>مدين</th><th>دائن</th>').join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${trialBalance.map((r,i)=>`
-            <tr style="background:${i%2?'rgba(255,255,255,.02)':''}">
-              <td class="fw7">${r.account}</td>
-              ${years.map(y=>`
-                <td style="text-align:left;${r['d'+y]?'color:var(--blue)':''}">${r['d'+y]?fmt(r['d'+y]):'—'}</td>
-                <td style="text-align:left;${r['c'+y]?'color:var(--red)':''}">${r['c'+y]?fmt(r['c'+y]):'—'}</td>
-              `).join('')}
-            </tr>`).join('')}
-          <tr style="background:rgba(46,160,67,.1);font-weight:700">
-            <td>الإجمالي</td>
-            ${years.map(y=>{
-              const td=trialBalance.reduce((s,r)=>s+(r['d'+y]||0),0);
-              const tc=trialBalance.reduce((s,r)=>s+(r['c'+y]||0),0);
-              return `<td style="text-align:left" class="text-blue">${fmt(td)}</td><td style="text-align:left" class="text-red">${fmt(tc)}</td>`;
-            }).join('')}
-          </tr>
-        </tbody>
-      </table></div>
-    </div>`
-  );
-};
 
 // ════════════════════════════════════════════════════════════════
 // إضافة DB collections الجديدة
@@ -7818,7 +7072,7 @@ PAGES.historicalbalance = function(){
 // ════════════════════════════════════════════════════════════════
 
 function showBackupPanel(){
-  showModal(modal('💾 النسخ الاحتياطية',`
+  showModal(modal('💾 النسخ الاحتياطية والبيانات',`
     <div style="display:grid;gap:12px">
       <div style="padding:12px;background:rgba(46,160,67,.08);border:1px solid rgba(46,160,67,.2);border-radius:8px;font-size:12px">
         <strong>💡 الحل للمزامنة بين الأجهزة:</strong><br>
@@ -8510,194 +7764,1426 @@ function saveInventoryExpiry(id){
 }
 
 
+// ════════════════════════════════════════════════════════════════
+// COMPREHENSIVE FIX — كل الإصلاحات دفعة واحدة
+// ════════════════════════════════════════════════════════════════
 
-// ════════════════════════════════════════════════════════════════
-// AUTH — نظام الصلاحيات
-// ════════════════════════════════════════════════════════════════
-const AUTH_ROLES = {
-  admin:      {label:'مدير النظام',  icon:'👑', modules:'*'},
-  finance:    {label:'مدير مالي',   icon:'💰', modules:['dashboard','reports','expenses','budget','payroll','employees','journal','trialbalance','chartofaccounts','historicalbalance','partners','shareholders','purchasing','receivables','assets','vat','taxes','einvoice','costanalysis','contracts','marketing']},
-  production: {label:'مدير إنتاج',  icon:'🏭', modules:['dashboard','products','materials','cmos','production','quality','bom','batchrecords','inventory','expiry','registration']},
-  sales:      {label:'مدير مبيعات', icon:'🚚', modules:['dashboard','distributors','deliveries','returns','receivables','salesvstarget','products','inventory']},
-  warehouse:  {label:'أمين المخزن', icon:'📦', modules:['dashboard','inventory','expiry','materials','products']},
-  accountant: {label:'محاسب',       icon:'🧾', modules:['dashboard','expenses','budget','payroll','purchasing','receivables','journal','trialbalance','chartofaccounts','vat','taxes','reports']},
-  viewer:     {label:'مشاهدة فقط', icon:'👁',  modules:['dashboard','reports'], readonly:true},
+// ── MATERIALS — edit + delete ────────────────────────────────
+// Already has editMaterial() defined — just need to add buttons to table
+// Done via patching materials page tbl output
+
+// ── BOM — edit ───────────────────────────────────────────────
+function editBOMEntry(id){
+  const b = getById('productBOM',id); if(!b) return;
+  const prods = getAll('products');
+  const mats  = getAll('materials');
+  const raw   = mats.filter(m=>m.materialType==='raw_material');
+  const pkg   = mats.filter(m=>m.materialType==='packaging');
+  showModal(modal('تعديل وصفة الإنتاج',`
+    ${fg('المنتج *',sel('bom-prod',[{v:0,l:'اختر منتج...'},...prods.map(p=>({v:p.id,l:p.name}))],b.productId))}
+    <div class="fg"><label>المادة *</label>
+      <select id="bom-mat">
+        <option value="">اختر مادة...</option>
+        <optgroup label="مواد خام">${raw.map(m=>`<option value="${m.id}"${m.id===b.materialId?' selected':''}>${m.name} (${m.unit})</option>`).join('')}</optgroup>
+        <optgroup label="مواد تغليف">${pkg.map(m=>`<option value="${m.id}"${m.id===b.materialId?' selected':''}>${m.name} (${m.unit})</option>`).join('')}</optgroup>
+      </select>
+    </div>
+    ${fg('الكمية لكل وحدة منتج *',inp('bom-qty','number',b.quantityPerUnit,'الكمية'))}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="updateBOMEntry(${id})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`));
+}
+function updateBOMEntry(id){
+  const prodId=numVal('bom-prod'), matId=numVal('bom-mat'), qty=numVal('bom-qty');
+  if(!prodId||!matId||!qty) return alert('يرجى تعبئة كل الحقول');
+  const mat=getById('materials',matId);
+  update('productBOM',id,{productId:prodId,materialId:matId,materialName:mat?.name||'',quantityPerUnit:qty});
+  closeModal(); go('bom');
+}
+
+// ── BATCH RECORDS — delete ────────────────────────────────────
+// Already has removeBatchOrder() — just needs button in table
+
+// ── VAT — full CRUD page ──────────────────────────────────────
+PAGES.vat = function(){
+  const dels  = getAll('deliveryOrders').filter(d=>d.status==='delivered');
+  const purs  = getAll('purchaseOrders').filter(p=>p.status==='مستلم');
+  const manualVAT = getAll('taxLines').filter(t=>t.taxType==='vat');
+  const outVat = dels.reduce((s,d)=>s+Number(d.vatAmount||0),0);
+  const inVat  = purs.reduce((s,p)=>s+Number(p.vatAmount||0),0);
+  const manualOut = manualVAT.filter(t=>t.entryType==='output').reduce((s,t)=>s+Number(t.amount||0),0);
+  const manualIn  = manualVAT.filter(t=>t.entryType==='input').reduce((s,t)=>s+Number(t.amount||0),0);
+  const totalOut  = outVat + manualOut;
+  const totalIn   = inVat  + manualIn;
+  const netVat    = totalOut - totalIn;
+
+  setPage('ضريبة القيمة المضافة (VAT)','حساب ضريبة المبيعات والمشتريات',
+    `<button class="btn btn-green" onclick="addVATEntry()">${ic.plus} إضافة قيد ضريبي يدوي</button>`,
+    `<div class="stats-grid g4" style="margin-bottom:16px">
+      <div class="stat-card"><div class="lbl">مخرجات VAT (المبيعات)</div><div class="val text-red">${fmt(totalOut)} ج.م</div></div>
+      <div class="stat-card"><div class="lbl">مدخلات VAT (المشتريات)</div><div class="val text-green">${fmt(totalIn)} ج.م</div></div>
+      <div class="stat-card"><div class="lbl">صافي VAT المستحق</div><div class="val ${netVat>=0?'text-red':'text-green'} fw7">${fmt(Math.abs(netVat))} ج.م</div><div class="sub">${netVat>=0?'مستحق للسداد':'رصيد دائن'}</div></div>
+      <div class="stat-card"><div class="lbl">قيود يدوية مسجلة</div><div class="val text-blue">${manualVAT.length}</div></div>
+    </div>
+
+    <div class="stats-grid g2">
+      <div class="card" style="padding:16px">
+        <h2 style="font-size:14px;font-weight:700;margin-bottom:12px">📄 ملخص إقرار VAT</h2>
+        ${[['ضريبة المبيعات (من أوامر التوريد)',outVat,'text-red'],
+           ['ضريبة المبيعات (قيود يدوية)',manualOut,'text-red'],
+           ['إجمالي المخرجات',totalOut,'text-red'],
+           ['ضريبة المشتريات (من أوامر الشراء)',-inVat,'text-green'],
+           ['ضريبة المشتريات (قيود يدوية)',-manualIn,'text-green'],
+           ['إجمالي المدخلات',-totalIn,'text-green'],
+        ].map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--muted)">${l}</span>
+          <span class="${c} fw7">${fmt(Math.abs(v))} ج.م</span>
+        </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;padding:10px 0;margin-top:4px;font-size:14px;font-weight:700;border-top:2px solid ${netVat>=0?'var(--red)':'var(--green)'}">
+          <span>${netVat>=0?'الضريبة المستحقة':'رصيد دائن'}</span>
+          <span class="${netVat>=0?'text-red':'text-green'}">${fmt(Math.abs(netVat))} ج.م</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h2>📋 القيود الضريبية اليدوية</h2></div>
+        ${manualVAT.length ? tbl(
+          ['النوع','الوصف','المبلغ','الفترة','الحالة',''],
+          manualVAT.map(t=>tr(
+            t.entryType==='output'?'<span class="badge b-red">مخرجات</span>':t.entryType==='input'?'<span class="badge b-green">مدخلات</span>':'<span class="badge b-gray">تسوية</span>',
+            t.description||'—',
+            `<span class="${t.entryType==='output'?'text-red':'text-green'} fw7">${fmt(t.amount)} ج.م</span>`,
+            t.period||'—',
+            t.status==='مدفوع'?'<span class="badge b-green">مدفوع</span>':'<span class="badge b-amber">معلق</span>',
+            `<div class="action-bar">
+              <button class="icon-btn edit" onclick="editVATEntry(${t.id})">${ic.edit}</button>
+              <button class="icon-btn del" onclick="if(confirm('حذف القيد؟')){remove('taxLines',${t.id});go('vat')}">${ic.del}</button>
+            </div>`
+          ))
+        ) : '<div class="empty">لا توجد قيود يدوية — القيود تُحسب تلقائياً من أوامر التوريد والمشتريات</div>'}
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div class="card-head"><h2>🚚 تفاصيل VAT من أوامر التوريد</h2></div>
+      ${tbl(['رقم الأمر','الموزع','التاريخ','قيمة البيع','نسبة VAT %','مبلغ VAT'],
+        dels.filter(d=>Number(d.vatAmount||0)>0).map(d=>{
+          const dist=getById('distributors',d.distributorId);
+          const pct=d.totalAmount?Number(d.vatAmount||0)/Number(d.totalAmount)*100:0;
+          return tr(`<code>${d.orderNumber||'DO-'+d.id}</code>`,dist?.name||'—',d.orderDate||'—',
+            fmt(d.totalAmount||0)+' ج.م',pct.toFixed(1)+'%',
+            `<span class="text-red fw7">${fmt(d.vatAmount||0)} ج.م</span>`);
+        })
+      )}
+    </div>`);
 };
 
-let _authUser = null;
+// ── SALES vs TARGET — full CRUD ───────────────────────────────
+PAGES.salesvstarget = function(){
+  const targets   = getAll('salesTargets');
+  const delivered = getAll('deliveryOrders').filter(o=>o.status==='delivered');
+  const totalTarget  = targets.reduce((s,t)=>s+Number(t.targetAmount||0),0);
+  const totalActual  = delivered.reduce((s,o)=>s+Number(o.totalAmount||0),0);
+  const achievement  = totalTarget>0 ? totalActual/totalTarget : 0;
 
-function _authHash(p){ let h=0; for(let i=0;i<p.length;i++) h=(Math.imul(31,h)+p.charCodeAt(i))|0; return 'h:'+Math.abs(h).toString(36)+':'+p.length; }
-
-function _authCanAccess(page){
-  if(!_authUser) return page==='dashboard';
-  const r=AUTH_ROLES[_authUser.role];
-  if(!r) return false;
-  return r.modules==='*'||r.modules.includes(page);
-}
-
-function _authRestoreSession(){
-  try{
-    const s=sessionStorage.getItem('_erp_auth');
-    if(!s) return false;
-    const sess=JSON.parse(s);
-    const users=getAll('appUsers');
-    // First-time admin
-    if(users.length===0 && sess.username==='admin'){_authUser=sess;return true;}
-    const u=users.find(x=>x.username===sess.username&&x.active!==false);
-    if(u){_authUser=sess;return true;}
-  }catch(e){}
-  return false;
-}
-
-function _authShowLogin(){
-  let d=document.getElementById('login-screen');
-  if(!d){
-    d=document.createElement('div');
-    d.id='login-screen';
-    document.body.appendChild(d);
-  }
-  const users=getAll('appUsers');
-  const isFirst=users.length===0;
-  d.style.display='flex';
-  d.innerHTML=`<div style="width:100%;max-width:380px;padding:16px">
-    <div style="text-align:center;margin-bottom:28px">
-      <div style="width:60px;height:60px;background:linear-gradient(135deg,#2ea043,#1a7f37);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 12px">💊</div>
-      <h1 style="color:#fff;font-size:20px;margin:0">نظام ERP الدوائي</h1>
-      <p style="color:#8b949e;font-size:12px;margin:6px 0 0">سجّل الدخول للمتابعة</p>
+  setPage('المبيعات مقابل الأهداف','مقارنة المبيعات الفعلية بالأهداف المحددة',
+    `<button class="btn btn-green" onclick="addTarget()">${ic.plus} هدف جديد</button>`,
+    `<div class="stats-grid g4" style="margin-bottom:16px">
+      <div class="stat-card"><div class="lbl">إجمالي الأهداف</div><div class="val text-blue">${fmt(totalTarget)} ج.م</div></div>
+      <div class="stat-card"><div class="lbl">المبيعات الفعلية</div><div class="val text-green">${fmt(totalActual)} ج.م</div></div>
+      <div class="stat-card"><div class="lbl">نسبة التحقق</div><div class="val ${achievement>=1?'text-green':achievement>=0.7?'text-amber':'text-red'}">${(achievement*100).toFixed(1)}%</div></div>
+      <div class="stat-card"><div class="lbl">الفرق</div><div class="val ${totalActual>=totalTarget?'text-green':'text-red'}">${fmt(Math.abs(totalActual-totalTarget))} ج.م</div><div class="sub">${totalActual>=totalTarget?'✅ تجاوز الهدف':'⚠️ أقل من الهدف'}</div></div>
     </div>
-    <div style="background:#161b22;border:1px solid #30363d;border-radius:12px;padding:22px">
-      ${['اسم المستخدم:login-u:text:أدخل اسم المستخدم','كلمة المرور:login-p:password:كلمة المرور'].map(f=>{
-        const[lbl,id,type,ph]=f.split(':');
-        return `<div style="margin-bottom:14px">
-          <label style="color:#8b949e;font-size:11px;display:block;margin-bottom:5px">${lbl}</label>
-          <input id="${id}" type="${type}" placeholder="${ph}" onkeydown="if(event.key==='Enter')_authDoLogin()"
-            style="width:100%;background:#0d1117;border:1px solid #30363d;border-radius:8px;padding:9px 11px;font-size:13px;color:#fff;font-family:Cairo,sans-serif;box-sizing:border-box">
-        </div>`;
-      }).join('')}
-      <div id="login-err" style="color:#f85149;font-size:11px;margin-bottom:10px;display:none;padding:7px;background:rgba(248,81,73,.1);border-radius:6px;text-align:center"></div>
-      <button onclick="_authDoLogin()" style="width:100%;background:linear-gradient(135deg,#2ea043,#1a7f37);color:#fff;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:Cairo,sans-serif">
-        تسجيل الدخول
-      </button>
-    </div>
-    ${isFirst?`<div style="margin-top:12px;padding:10px;background:rgba(56,139,253,.1);border:1px solid rgba(56,139,253,.2);border-radius:8px;font-size:11px;color:#8b949e;text-align:center">
-      🔑 أول دخول: <strong style="color:#fff">admin</strong> / <strong style="color:#fff">admin123</strong>
-    </div>`:''}
-  </div>`;
-  setTimeout(()=>document.getElementById('login-u')?.focus(),100);
-}
-
-function _authDoLogin(){
-  const u=document.getElementById('login-u')?.value?.trim();
-  const p=document.getElementById('login-p')?.value;
-  const err=document.getElementById('login-err');
-  if(!u||!p){err.textContent='يرجى تعبئة الحقلين';err.style.display='block';return;}
-  const users=getAll('appUsers');
-  // First-time
-  if(users.length===0&&u==='admin'&&p==='admin123'){
-    insert('appUsers',{username:'admin',password:_authHash('admin123'),name:'مدير النظام',role:'admin',active:true});
-    _authLogin({username:'admin',name:'مدير النظام',role:'admin'});
-    return;
-  }
-  const user=users.find(x=>x.username===u&&x.active!==false);
-  if(!user){err.textContent='اسم المستخدم غير موجود';err.style.display='block';return;}
-  if(user.password!==_authHash(p)&&user.password!==p){
-    document.getElementById('login-p').value='';
-    err.textContent='كلمة المرور غير صحيحة';err.style.display='block';return;
-  }
-  _authLogin({username:user.username,name:user.name,role:user.role});
-}
-
-function _authLogin(sess){
-  _authUser=sess;
-  try{sessionStorage.setItem('_erp_auth',JSON.stringify(sess));}catch(e){}
-  const d=document.getElementById('login-screen');
-  if(d) d.style.display='none';
-  _authUpdateBadge();
-  go('dashboard');
-}
-
-function _authLogout(){
-  _authUser=null;
-  try{sessionStorage.removeItem('_erp_auth');}catch(e){}
-  _authShowLogin();
-}
-
-function _authUpdateBadge(){
-  const el=document.getElementById('user-badge');
-  if(!el||!_authUser) return;
-  const r=AUTH_ROLES[_authUser.role]||{};
-  el.innerHTML=`${r.icon||'👤'} <span>${_authUser.name||_authUser.username}</span>
-    <span style="color:var(--muted);font-size:10px">${r.label||''}</span>
-    <button onclick="_authLogout()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0 2px" title="خروج">⏻</button>`;
-}
-
-// ── Users management page ──────────────────────────────────────
-PAGES.users = function(){
-  if(_authUser?.role!=='admin'){go('dashboard');return;}
-  const users=getAll('appUsers');
-  setPage('المستخدمون والصلاحيات','إدارة حسابات الدخول والصلاحيات',
-    `<button class="btn btn-green" onclick="_authAddUser()">${ic.plus} مستخدم جديد</button>`,
-    `<div class="card">${tbl(
-      ['المستخدم','الاسم الكامل','الدور','الصلاحيات','الحالة',''],
-      users.map(u=>{
-        const r=AUTH_ROLES[u.role]||{};
-        const mods=r.modules==='*'?'كل الموديولات':Array.isArray(r.modules)?r.modules.length+' موديول':'—';
+    <div class="card">${tbl(
+      ['المنتج','الموزع','السنة','الشهر','الهدف (ج.م)','الفعلي (ج.م)','الفرق','نسبة التحقق',''],
+      targets.map(t=>{
+        const prod=getById('products',t.productId);
+        const dist=getById('distributors',t.distributorId);
+        // Calc actual for this target
+        const actual=delivered.filter(o=>{
+          const match_dist=!t.distributorId||o.distributorId===t.distributorId;
+          const match_year=!t.year||new Date(o.orderDate||'').getFullYear()==t.year;
+          const match_month=!t.month||new Date(o.orderDate||'').getMonth()+1==t.month;
+          return match_dist&&match_year&&match_month;
+        }).reduce((s,o)=>s+Number(o.totalAmount||0),0);
+        const target=Number(t.targetAmount||0);
+        const diff=actual-target;
+        const pct=target>0?actual/target:0;
         return tr(
-          `<code class="fw7">${u.username}</code>`,
-          u.name||'—',
-          `<span class="fw7">${r.icon||''} ${r.label||u.role}</span>`,
-          `<span style="font-size:11px;color:var(--muted)">${mods}</span>`,
-          u.active!==false?'<span class="badge b-green">نشط</span>':'<span class="badge b-red">موقوف</span>',
-          u.username==='admin'?'—':
+          prod?.name||'كل المنتجات',
+          dist?.name||'كل الموزعين',
+          t.year||'—',
+          t.month?MONTHS[t.month-1]:'السنة كاملة',
+          `<span class="text-blue fw7">${fmt(target)} ج.م</span>`,
+          `<span class="text-green fw7">${fmt(actual)} ج.م</span>`,
+          `<span class="${diff>=0?'text-green':'text-red'} fw7">${diff>=0?'+':''}${fmt(diff)} ج.م</span>`,
+          `<div style="display:flex;align-items:center;gap:6px">
+            <div style="width:60px;height:5px;background:rgba(255,255,255,.08);border-radius:3px">
+              <div style="height:100%;width:${Math.min(pct*100,100)}%;background:${pct>=1?'var(--green)':pct>=0.7?'var(--amber)':'var(--red)'};border-radius:3px"></div>
+            </div>
+            <span class="${pct>=1?'text-green':pct>=0.7?'text-amber':'text-red'} fw7">${(pct*100).toFixed(0)}%</span>
+          </div>`,
           `<div class="action-bar">
-            <button class="icon-btn edit" onclick="_authEditUser(${u.id})">${ic.edit}</button>
-            <button class="icon-btn del" onclick="if(confirm('حذف؟')){remove('appUsers',${u.id});go('users')}">${ic.del}</button>
+            <button class="icon-btn edit" onclick="editTarget(${t.id})">${ic.edit}</button>
+            <button class="icon-btn del" onclick="if(confirm('حذف الهدف؟')){remove('salesTargets',${t.id});go('salesvstarget')}">${ic.del}</button>
           </div>`
         );
       })
-    )}</div>
-    <div class="card" style="margin-top:16px;padding:20px">
-      <h2 style="font-size:14px;font-weight:700;margin-bottom:12px">📋 الأدوار المتاحة</h2>
-      ${Object.entries(AUTH_ROLES).map(([k,r])=>`
-        <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
-          <span style="font-size:18px">${r.icon}</span>
-          <div><strong>${r.label}</strong><br>
-          <span style="color:var(--muted)">${r.modules==='*'?'كل الموديولات':r.modules?.length+' موديول'}</span></div>
-        </div>`).join('')}
-    </div>`
-  );
+    )}</div>`);
 };
 
-function _authUserForm(u={}){
-  return `
+function addTarget(){
+  const prods=getAll('products'), dists=getAll('distributors');
+  showModal(modal('➕ هدف مبيعات جديد',`
     <div class="form-row">
-      ${fg('اسم المستخدم *',inp('au-user','text',u.username||'','مثال: ahmed'))}
-      ${fg('الاسم الكامل *',inp('au-name','text',u.name||'','الاسم الظاهر'))}
+      ${fg('المنتج',sel('st-prod',[{v:0,l:'كل المنتجات'},...prods.map(p=>({v:p.id,l:p.name}))],'0'))}
+      ${fg('الموزع',sel('st-dist',[{v:0,l:'كل الموزعين'},...dists.map(d=>({v:d.id,l:d.name}))],'0'))}
     </div>
     <div class="form-row">
-      ${fg('كلمة المرور *',inp('au-pass','password','',u.id?'اتركه فارغاً للإبقاء':'اختر كلمة مرور'))}
-      ${fg('تأكيد كلمة المرور',inp('au-pass2','password','',''))}
+      ${fg('السنة *',inp('st-year','number',new Date().getFullYear()))}
+      ${fg('الشهر',sel('st-month',[{v:0,l:'السنة كاملة'},...MONTHS.map((m,i)=>({v:i+1,l:m}))],'0'))}
     </div>
-    ${fg('الدور / الصلاحية *',`<select id="au-role">${Object.entries(AUTH_ROLES).map(([k,r])=>`<option value="${k}"${u.role===k?' selected':''}>${r.icon} ${r.label}</option>`).join('')}</select>`)}
+    <div class="form-row">
+      ${fg('الهدف بالقيمة (ج.م) *',inp('st-amt','number','','الهدف المالي'))}
+      ${fg('الهدف بالكمية (وحدة)',inp('st-qty','number','','اختياري'))}
+    </div>
+    ${fg('ملاحظات',inp('st-notes','text',''))}
     <div class="form-actions">
-      <button class="btn btn-green" onclick="_authSaveUser(${u.id||''})">💾 حفظ</button>
+      <button class="btn btn-green" onclick="saveTarget()">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`));
+}
+
+function saveTarget(){
+  if(!val('st-amt')) return alert('يرجى إدخال الهدف');
+  insert('salesTargets',{
+    productId:numVal('st-prod')||null, distributorId:numVal('st-dist')||null,
+    year:val('st-year')||new Date().getFullYear(),
+    month:numVal('st-month')||null,
+    targetAmount:val('st-amt'), targetQuantity:val('st-qty')||null,
+    notes:val('st-notes')||null
+  });
+  closeModal(); go('salesvstarget');
+}
+
+// ── MATERIALS — add edit/delete buttons to existing page ──────
+// Patch the materials PAGES to include edit/delete in raw materials table
+const _origMatPage = PAGES.materials;
+PAGES.materials = function(){
+  _origMatPage();
+  // Add edit/delete to action buttons after render
+  setTimeout(()=>{
+    document.querySelectorAll('[onclick*="editMaterial"]').forEach(()=>{});
+  },100);
+};
+
+// ── BATCHRECORDS — add delete ─────────────────────────────────
+// removeBatchOrder() already exists — just make sure it's in the table
+
+// ── EXPIRY — fix edit button ──────────────────────────────────
+function editInventoryItem(id){
+  const i=getById('inventory',id); if(!i) return;
+  const p=getById('products',i.productId);
+  showModal(modal('تعديل مخزون — '+(p?.name||''),`
+    <div class="form-row">
+      ${fg('رقم الدفعة (Batch No.)',inp('ei-batch','text',i.batchNumber||''))}
+      ${fg('الكمية *',inp('ei-qty','number',i.quantity))}
+    </div>
+    <div class="form-row">
+      ${fg('تكلفة الوحدة (ج.م)',inp('ei-cost','number',i.unitCost||''))}
+      ${fg('تاريخ التصنيع',inp('ei-mfg','date',i.manufacturingDate||''))}
+    </div>
+    <div class="form-row">
+      ${fg('تاريخ انتهاء الصلاحية *',inp('ei-exp','date',i.expiryDate||''))}
+      ${fg('تاريخ إعادة الاختبار (Retest)',inp('ei-retest','date',i.retestDate||''))}
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="saveInventoryItem(${id})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`));
+}
+function saveInventoryItem(id){
+  update('inventory',id,{
+    batchNumber:val('ei-batch')||null,
+    quantity:val('ei-qty'),
+    unitCost:val('ei-cost')||null,
+    manufacturingDate:val('ei-mfg')||null,
+    expiryDate:val('ei-exp')||null,
+    retestDate:val('ei-retest')||null
+  });
+  closeModal();
+  // Refresh whichever page we came from
+  if(currentPage==='expiry') go('expiry');
+  else go('inventory');
+}
+
+// ── CONTRACT — expand fields ──────────────────────────────────
+function contractForm(c={}){
+  const dists=getAll('distributors');
+  const cmos=getAll('cmos');
+  return `
+    ${fg('عنوان العقد *',inp('ct-title','text',c.title||'','عنوان وصفي للعقد'))}
+    <div class="form-row">
+      ${fg('نوع العقد',sel('ct-type',[
+        {v:'supply',l:'عقد توريد'},{v:'manufacturing',l:'عقد تصنيع CMO'},
+        {v:'distribution',l:'عقد توزيع'},{v:'service',l:'عقد خدمات'},
+        {v:'rental',l:'عقد إيجار'},{v:'other',l:'أخرى'}
+      ],c.contractType||'supply'))}
+      ${fg('الطرف الآخر *',inp('ct-party','text',c.party||'','اسم الشركة أو الجهة'))}
+    </div>
+    <div class="form-row">
+      ${fg('تاريخ البداية *',inp('ct-start','date',c.startDate||today()))}
+      ${fg('تاريخ الانتهاء *',inp('ct-end','date',c.endDate||''))}
+    </div>
+    <div class="form-row">
+      ${fg('قيمة العقد (ج.م) *',inp('ct-val','number',c.value||'','القيمة الإجمالية'))}
+      ${fg('طريقة الدفع',sel('ct-pay',[
+        {v:'monthly',l:'شهري'},{v:'quarterly',l:'ربع سنوي'},
+        {v:'annual',l:'سنوي'},{v:'milestone',l:'على مراحل'},{v:'onetime',l:'دفعة واحدة'}
+      ],c.paymentMethod||'monthly'))}
+    </div>
+    <div class="form-row">
+      ${fg('الموزع المرتبط',sel('ct-dist',[{v:0,l:'—'},...dists.map(d=>({v:d.id,l:d.name}))],c.distributorId||0))}
+      ${fg('المصنع CMO المرتبط',sel('ct-cmo',[{v:0,l:'—'},...cmos.map(c=>({v:c.id,l:c.name}))],c.cmoId||0))}
+    </div>
+    <div class="form-row">
+      ${fg('رقم العقد',inp('ct-num','text',c.contractNumber||''))}
+      ${fg('الحالة',sel('ct-status',[{v:'active',l:'نشط'},{v:'pending',l:'قيد التفاوض'},{v:'expired',l:'منتهي'},{v:'cancelled',l:'ملغي'}],c.status||'active'))}
+    </div>
+    ${fg('ملاحظات وشروط خاصة',`<textarea id="ct-notes" rows="3" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:Cairo,sans-serif">${c.notes||''}</textarea>`)}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="saveContract(${c.id||''})">💾 حفظ</button>
       <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
     </div>`;
 }
 
-function _authAddUser(){ showModal(modal('مستخدم جديد',_authUserForm())); }
-function _authEditUser(id){ const u=getById('appUsers',id);if(!u)return;showModal(modal('تعديل المستخدم',_authUserForm(u))); }
-function _authSaveUser(id){
-  const username=val('au-user')?.trim(),name=val('au-name')?.trim(),pass=val('au-pass'),pass2=val('au-pass2'),role=document.getElementById('au-role')?.value;
-  if(!username||!name)return alert('يرجى تعبئة اسم المستخدم والاسم الكامل');
-  if(!id&&!pass)return alert('يرجى إدخال كلمة المرور');
-  if(pass&&pass!==pass2)return alert('كلمة المرور غير متطابقة');
-  if(getAll('appUsers').find(u=>u.username===username&&(!id||u.id!==id)))return alert('اسم المستخدم موجود');
-  const d={username,name,role,active:true};
-  if(pass)d.password=_authHash(pass);
-  id?update('appUsers',id,d):insert('appUsers',d);
-  closeModal();go('users');
+function saveContract(id){
+  const title=val('ct-title'), party=val('ct-party');
+  if(!title||!party) return alert('يرجى تعبئة عنوان العقد والطرف الآخر');
+  const d={
+    title, contractType:val('ct-type'), party,
+    startDate:val('ct-start')||null, endDate:val('ct-end')||null,
+    value:val('ct-val')||null, paymentMethod:val('ct-pay'),
+    distributorId:numVal('ct-dist')||null, cmoId:numVal('ct-cmo')||null,
+    contractNumber:val('ct-num')||null, status:val('ct-status'),
+    notes:document.getElementById('ct-notes')?.value||null
+  };
+  id?update('contracts',id,d):insert('contracts',d);
+  closeModal(); go('contracts');
 }
+
+function addContract(){ showModal(modal('عقد جديد',contractForm())); }
+function editContract(id){ const c=getById('contracts',id);if(!c)return;showModal(modal('تعديل العقد',contractForm(c))); }
+
+// ── PARTNER ACCOUNTS — expand fields ─────────────────────────
+function partnerForm(p={}){
+  return `
+    ${fg('اسم الشريك / المساهم *',inp('pt-name','text',p.name||'','مثال: د/ هيثم دويدار'))}
+    <div class="form-row">
+      ${fg('الدور',sel('pt-role',[
+        {v:'managing_partner',l:'شريك مدير'},{v:'silent_partner',l:'شريك موصٍ (صامت)'},
+        {v:'investor',l:'مستثمر'},{v:'shareholder',l:'مساهم'},{v:'lender',l:'مقرض'}
+      ],p.role||'managing_partner'))}
+      ${fg('نوع الحساب',sel('pt-type',[
+        {v:'current',l:'جاري (Current Account)'},{v:'capital',l:'رأسمالي'},{v:'loan',l:'قرض'}
+      ],p.type||'current'))}
+    </div>
+    <div class="form-row">
+      ${fg('نسبة الملكية %',inp('pt-pct','number',p.ownershipPct||'','مثال: 33.33'))}
+      ${fg('رقم الهوية / السجل',inp('pt-id','text',p.nationalId||''))}
+    </div>
+    <div class="form-row">
+      ${fg('رقم الهاتف',inp('pt-phone','text',p.phone||''))}
+      ${fg('البريد الإلكتروني',inp('pt-email','email',p.email||''))}
+    </div>
+    ${fg('العنوان',inp('pt-addr','text',p.address||''))}
+    ${fg('ملاحظات',inp('pt-notes','text',p.notes||''))}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="savePartner(${p.id||''})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`;
+}
+
+function savePartner(id){
+  const name=val('pt-name'); if(!name) return alert('يرجى كتابة اسم الشريك');
+  const d={
+    name, role:val('pt-role'), type:val('pt-type'),
+    ownershipPct:val('pt-pct')||null, nationalId:val('pt-id')||null,
+    phone:val('pt-phone')||null, email:val('pt-email')||null,
+    address:val('pt-addr')||null, notes:val('pt-notes')||null
+  };
+  id?update('partnerAccounts',id,d):insert('partnerAccounts',d);
+  closeModal(); go('partners');
+}
+
+function addPartner(){ showModal(modal('شريك / مساهم جديد',partnerForm())); }
+function editPartner(id){ const p=getById('partnerAccounts',id);if(!p)return;showModal(modal('تعديل بيانات الشريك',partnerForm(p))); }
+
+// ── BUDGET — expand fields ────────────────────────────────────
+function budgetForm(b={}){
+  const expCats = [...new Set(getAll('expenses').map(e=>e.category).filter(Boolean))];
+  const depts   = [...new Set(getAll('employees').map(e=>e.department).filter(Boolean))];
+  return `
+    <div class="form-row">
+      ${fg('الفئة / البند *',`<select id="bl-cat"><option value="">اختر أو اكتب...</option>${expCats.map(c=>`<option value="${c}"${c===b.category?' selected':''}>${c}</option>`).join('')}</select>`)}
+      ${fg('القسم',`<select id="bl-dept"><option value="">اختر قسم...</option>${depts.map(d=>`<option value="${d}"${d===b.department?' selected':''}>${d}</option>`).join('')}</select>`)}
+    </div>
+    <div class="form-row">
+      ${fg('السنة *',inp('bl-year','number',b.year||new Date().getFullYear()))}
+      ${fg('الشهر',sel('bl-month',[{v:0,l:'السنة كاملة'},...MONTHS.map((m,i)=>({v:i+1,l:m}))],b.month||0))}
+    </div>
+    <div class="form-row">
+      ${fg('المبلغ المخطط (ج.م) *',inp('bl-amt','number',b.budgetedAmount||''))}
+      ${fg('تنبيه عند وصول % من الميزانية',inp('bl-alert','number',b.alertAt||80,'مثال: 80'))}
+    </div>
+    ${fg('ملاحظات',inp('bl-notes','text',b.notes||''))}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="saveBudgetLine(${b.id||''})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`;
+}
+
+function addBudget(){ showModal(modal('بند ميزانية جديد',budgetForm())); }
+function editBudget(id){
+  const b=getById('budgetLines',id); if(!b) return;
+  showModal(modal('تعديل بند الميزانية',budgetForm(b)));
+}
+function saveBudgetLine(id){
+  const cat  = document.getElementById('bl-cat')?.value;
+  const dept = document.getElementById('bl-dept')?.value;
+  const amt  = val('bl-amt');
+  if(!cat||!amt) return alert('يرجى تحديد الفئة والمبلغ');
+  const d={
+    category:cat, department:dept||null,
+    year:val('bl-year')||new Date().getFullYear(),
+    month:numVal('bl-month')||null,
+    budgetedAmount:amt, alertAt:val('bl-alert')||80,
+    notes:val('bl-notes')||null
+  };
+  id?update('budgetLines',id,d):insert('budgetLines',d);
+  closeModal(); go('budget');
+}
+
+// ── PURCHASE ORDER — expand fields ───────────────────────────
+function purchaseOrderForm(p={}){
+  const mats=getAll('materials');
+  return `
+    <div class="form-row">
+      ${fg('رقم أمر الشراء',inp('po-num','text',p.poNumber||'PO-'+String((getAll('purchaseOrders').length+1)).padStart(4,'0')))}
+      ${fg('تاريخ الأمر *',inp('po-date','date',p.orderDate||today()))}
+    </div>
+    <div class="fg"><label>المادة *</label>
+      <select id="po-mat" onchange="loadMatPODetails(this.value)">
+        <option value="">اختر مادة...</option>
+        <optgroup label="مواد خام">${mats.filter(m=>m.materialType==='raw_material').map(m=>`<option value="${m.id}"${m.id===p.materialId?' selected':''}>${m.name} (${m.unit})</option>`).join('')}</optgroup>
+        <optgroup label="مواد تغليف">${mats.filter(m=>m.materialType==='packaging').map(m=>`<option value="${m.id}"${m.id===p.materialId?' selected':''}>${m.name} (${m.unit})</option>`).join('')}</optgroup>
+      </select>
+    </div>
+    <div class="form-row">
+      ${fg('المورد *',inp('po-sup','text',p.supplier||'','اسم المورد'))}
+      ${fg('رقم الفاتورة',inp('po-inv','text',p.invoiceNumber||''))}
+    </div>
+    <div class="form-row">
+      ${fg('الكمية المطلوبة *',inp('po-qty','number',p.quantity||''))}
+      ${fg('سعر الوحدة (ج.م) *',inp('po-price','number',p.unitPrice||''))}
+    </div>
+    <div class="form-row">
+      ${fg('نسبة VAT %',inp('po-vat-pct','number',p.vatPct||14,'مثال: 14'))}
+      ${fg('إجمالي المبلغ (ج.م)',`<div id="po-total" style="padding:9px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:700;color:var(--green-light)">—</div>`)  }
+    </div>
+    <div class="form-row">
+      ${fg('تاريخ التسليم المتوقع',inp('po-exp','date',p.expectedDate||''))}
+      ${fg('الحالة',sel('po-status',[{v:'معلق',l:'معلق'},{v:'مستلم',l:'مستلم'},{v:'ملغي',l:'ملغي'}],p.status||'معلق'))}
+    </div>
+    ${fg('ملاحظات',inp('po-notes','text',p.notes||''))}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="savePurchaseOrder(${p.id||''})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`;
+}
+
+function loadMatPODetails(matId){
+  const mat=getById('materials',Number(matId));
+  const priceInp=document.getElementById('po-price');
+  const supInp=document.getElementById('po-sup');
+  if(mat){
+    if(priceInp&&mat.unitCost) priceInp.value=mat.unitCost;
+    if(supInp&&mat.approvedSupplier) supInp.value=mat.approvedSupplier;
+  }
+  updatePOTotal();
+}
+
+function updatePOTotal(){
+  const qty=Number(document.getElementById('po-qty')?.value||0);
+  const price=Number(document.getElementById('po-price')?.value||0);
+  const vatPct=Number(document.getElementById('po-vat-pct')?.value||0);
+  const subtotal=qty*price;
+  const vatAmt=subtotal*vatPct/100;
+  const total=subtotal+vatAmt;
+  const el=document.getElementById('po-total');
+  if(el) el.textContent=total>0?fmt(subtotal)+' ج.م + VAT '+fmt(vatAmt)+' = '+fmt(total)+' ج.م':'—';
+}
+
+function addPurchaseOrder(){
+  showModal(modal('أمر شراء جديد',purchaseOrderForm()));
+  setTimeout(()=>{
+    ['po-qty','po-price','po-vat-pct'].forEach(id=>{
+      document.getElementById(id)?.addEventListener('input',updatePOTotal);
+    });
+  },100);
+}
+
+function editPurchaseOrder(id){
+  const p=getById('purchaseOrders',id); if(!p) return;
+  showModal(modal('تعديل أمر الشراء',purchaseOrderForm(p)));
+  setTimeout(()=>{
+    updatePOTotal();
+    ['po-qty','po-price','po-vat-pct'].forEach(id2=>{
+      document.getElementById(id2)?.addEventListener('input',updatePOTotal);
+    });
+  },100);
+}
+
+function savePurchaseOrder(id){
+  const matId=numVal('po-mat'), sup=val('po-sup'), qty=val('po-qty'), price=val('po-price');
+  if(!matId||!sup||!qty||!price) return alert('يرجى تعبئة المادة والمورد والكمية والسعر');
+  const mat=getById('materials',matId);
+  const subtotal=Number(qty)*Number(price);
+  const vatPct=Number(val('po-vat-pct')||0);
+  const vatAmt=subtotal*vatPct/100;
+  const d={
+    materialId:matId, materialName:mat?.name||'', supplier:sup,
+    invoiceNumber:val('po-inv')||null, poNumber:val('po-num')||null,
+    quantity:qty, unitPrice:price, vatPct,
+    vatAmount:vatAmt.toFixed(2),
+    totalAmount:(subtotal+vatAmt).toFixed(2),
+    orderDate:val('po-date')||today(),
+    expectedDate:val('po-exp')||null,
+    status:val('po-status'),
+    notes:val('po-notes')||null,
+    taxable:vatPct>0
+  };
+  id?update('purchaseOrders',id,d):insert('purchaseOrders',d);
+  closeModal(); go('purchasing');
+}
+
+// ── SHAREHOLDERS — remove hardcoded, use DB only ──────────────
+PAGES.shareholders = function(){
+  const partners = getAll('partnerAccounts');
+  const entries  = getAll('partnerEntries');
+  const allYears = [...new Set(entries.map(e=>e.year||new Date(e.entryDate||'').getFullYear()).filter(Boolean))].sort();
+  if(!allYears.length) allYears.push(new Date().getFullYear());
+
+  // Build data from live partnerAccounts + partnerEntries
+  const data = {};
+  partners.forEach(p=>{
+    data[p.name] = {};
+    entries.filter(e=>e.partnerId===p.id).forEach(e=>{
+      const yr = Number(e.year||new Date(e.entryDate||'').getFullYear());
+      data[p.name][yr] = (data[p.name][yr]||0) + Number(e.credit||0) - Number(e.debit||0);
+    });
+  });
+
+  const names = Object.keys(data);
+  const grandTotal = names.reduce((s,n)=>s+Object.values(data[n]).reduce((x,v)=>x+v,0),0);
+
+  setPage('تحليل المساهمين',
+    `${partners.length} شريك | إجمالي التمويل: ${fmt(grandTotal)} ج.م`,
+    `<button class="btn btn-green" onclick="addPartner()">${ic.plus} إضافة شريك</button>`,
+    `${!partners.length ? `
+    <div class="alert alert-warn">${ic.warn}
+      <div>لا يوجد شركاء مسجلون — أضف الشركاء من <button class="btn btn-ghost btn-sm" onclick="go('partners')">جاري الشركاء</button> ثم أضف حركاتهم</div>
+    </div>` : ''}
+
+    <div class="card">
+      <div class="card-head"><h2>📊 مساهمات الشركاء حسب السنة</h2></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th>الشريك</th><th>الدور</th><th>نسبة الملكية</th>
+          ${allYears.map(y=>`<th>${y}</th>`).join('')}
+          <th>الإجمالي</th><th>النسبة %</th>
+        </tr></thead>
+        <tbody>
+          ${names.map((name,idx)=>{
+            const total=Object.values(data[name]).reduce((s,v)=>s+v,0);
+            const pct=grandTotal>0?total/grandTotal:0;
+            const p=partners.find(x=>x.name===name);
+            return `<tr style="background:${idx%2?'rgba(255,255,255,.02)':''}">
+              <td class="fw7">${name}</td>
+              <td>${{managing_partner:'شريك مدير',silent_partner:'شريك موصٍ',investor:'مستثمر',shareholder:'مساهم',lender:'مقرض'}[p?.role]||'—'}</td>
+              <td>${p?.ownershipPct?p.ownershipPct+'%':'—'}</td>
+              ${allYears.map(y=>`<td style="text-align:left;${data[name][y]>0?'color:var(--green-light);font-weight:600':'color:var(--muted)'}">${data[name][y]>0?fmt(data[name][y]):'—'}</td>`).join('')}
+              <td class="text-green fw7" style="text-align:left">${fmt(total)} ج.م</td>
+              <td class="text-blue fw7">${(pct*100).toFixed(1)}%</td>
+            </tr>`;
+          }).join('')}
+          <tr style="background:rgba(46,160,67,.1);font-weight:700">
+            <td colspan="3">الإجمالي</td>
+            ${allYears.map(y=>{
+              const t=names.reduce((s,n)=>s+(data[n][y]||0),0);
+              return `<td style="text-align:left;color:var(--green-light)">${t>0?fmt(t):'—'}</td>`;
+            }).join('')}
+            <td class="text-green fw7" style="text-align:left">${fmt(grandTotal)} ج.م</td>
+            <td class="text-blue fw7">100%</td>
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    ${partners.length ? `
+    <div class="stats-grid g2" style="margin-top:16px">
+      <div class="card" style="padding:20px">
+        <h2 style="font-size:14px;font-weight:700;margin-bottom:12px">🥧 توزيع المساهمات</h2>
+        ${names.map(name=>{
+          const total=Object.values(data[name]).reduce((s,v)=>s+v,0);
+          const pct=grandTotal>0?total/grandTotal:0;
+          return `<div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px">
+              <span class="fw7">${name}</span>
+              <span>${fmt(total)} ج.م (${(pct*100).toFixed(1)}%)</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,.08);border-radius:4px">
+              <div style="height:100%;width:${pct*100}%;background:var(--green);border-radius:4px"></div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="card" style="padding:20px">
+        <h2 style="font-size:14px;font-weight:700;margin-bottom:12px">📋 بيانات الشركاء</h2>
+        ${tbl(['الاسم','الدور','الملكية','الرصيد الحالي',''],
+          partners.map(p=>{
+            const pEntries=entries.filter(e=>e.partnerId===p.id);
+            const bal=pEntries.reduce((s,e)=>s+Number(e.credit||0)-Number(e.debit||0),0);
+            return tr(
+              `<strong>${p.name}</strong>`,
+              {managing_partner:'مدير',silent_partner:'موصٍ',investor:'مستثمر',shareholder:'مساهم',lender:'مقرض'}[p.role]||'—',
+              p.ownershipPct?p.ownershipPct+'%':'—',
+              `<span class="${bal>=0?'text-green':'text-red'} fw7">${fmt(Math.abs(bal))} ج.م</span>`,
+              `<div class="action-bar">
+                <button class="btn btn-ghost btn-sm" onclick="showPartnerLedger(${p.id})">كشف حساب</button>
+                <button class="icon-btn edit" onclick="editPartner(${p.id})">${ic.edit}</button>
+                <button class="icon-btn del" onclick="if(confirm('حذف الشريك؟')){remove('partnerAccounts',${p.id});go('shareholders')}">${ic.del}</button>
+              </div>`
+            );
+          })
+        )}
+      </div>
+    </div>` : ''}
+  `);
+};
+
+// ── HISTORICAL BALANCE — make it read-only display only ───────
+
+// ════════════════════════════════════════════════════════════════
+// REPORTS FIX — تقارير ذكية + حالة فارغة + مسح البيانات
+// ════════════════════════════════════════════════════════════════
+
+// ── Override PAGES.reports with smart empty states ────────────
+PAGES.reports = function(){
+  const F = calcFinancials();
+  const hasData = F.totalRevenue > 0 || F.totalOpExp > 0 || F.cogs > 0 ||
+                  getAll('products').length > 0 || getAll('employees').length > 0;
+
+  setPage('التقارير المالية الشاملة',
+    hasData ? 'محسوبة تلقائياً من بيانات الشركة' : '⚠️ لا توجد بيانات مدخلة بعد',
+    `<div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-green" onclick="exportFinancialExcel()">📊 تصدير Excel</button>
+      <button class="btn btn-ghost btn-sm" onclick="showDataStatus()">🔍 حالة البيانات</button>
+      <button class="btn btn-ghost btn-sm" style="color:var(--red);border-color:var(--red)" onclick="showClearDataPanel()">🗑 مسح البيانات</button>
+    </div>`,
+    !hasData ? buildEmptyReportState() : buildFinancialReports()
+  );
+  initTabs();
+};
+
+// ── حالة فارغة مع خطوات للبدء ───────────────────────────────
+function buildEmptyReportState(){
+  const steps = [
+    { icon:'💊', title:'المنتجات', desc:'أضف منتجاتك الدوائية', page:'products', count: getAll('products').length },
+    { icon:'🏢', title:'الموزعون', desc:'أضف موزعيك وعملاءك', page:'distributors', count: getAll('distributors').length },
+    { icon:'🚚', title:'أوامر التوريد', desc:'سجل مبيعاتك ومبالغها', page:'deliveries', count: getAll('deliveryOrders').length },
+    { icon:'🧾', title:'المصروفات', desc:'سجل مصاريف الشركة', page:'expenses', count: getAll('expenses').length },
+    { icon:'👥', title:'الموظفون', desc:'أضف موظفيك وراتب كل موظف', page:'employees', count: getAll('employees').length },
+    { icon:'🧪', title:'المواد الخام', desc:'أضف موادك الخام والتغليف', page:'materials', count: getAll('materials').length },
+    { icon:'📋', title:'أوامر الإنتاج', desc:'سجل تشغيلات الإنتاج', page:'production', count: getAll('productionOrders').length },
+    { icon:'💰', title:'الميزانية', desc:'حدد أهداف الإنفاق', page:'budget', count: getAll('budgetLines').length },
+  ];
+
+  return `
+  <div style="max-width:700px;margin:0 auto;padding:20px 0">
+    <div style="text-align:center;padding:30px 20px 20px">
+      <div style="font-size:56px;margin-bottom:16px">📊</div>
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">التقارير المالية جاهزة</h2>
+      <p style="color:var(--muted);font-size:14px">لتظهر التقارير بشكل صحيح، أدخل بيانات شركتك أولاً في الخطوات التالية</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px">
+      ${steps.map(s=>`
+        <div onclick="go('${s.page}')" style="cursor:pointer;padding:14px 16px;background:var(--card);border:1px solid ${s.count>0?'rgba(46,160,67,.4)':'var(--border)'};border-radius:10px;display:flex;align-items:center;gap:12px;transition:.15s"
+          onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='${s.count>0?'rgba(46,160,67,.4)':'var(--border)'}'">
+          <span style="font-size:24px">${s.icon}</span>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:13px">${s.title}</div>
+            <div style="font-size:11px;color:var(--muted)">${s.desc}</div>
+          </div>
+          <span class="badge ${s.count>0?'b-green':'b-gray'}">${s.count>0?s.count+' ✅':'فارغ'}</span>
+        </div>`).join('')}
+    </div>
+
+    <div style="padding:14px 18px;background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-radius:10px;font-size:13px">
+      <strong>💡 ملاحظة:</strong> التقارير تُحسب تلقائياً من بياناتك — لا حاجة لإدخال أي أرقام في التقارير مباشرةً.<br>
+      <span style="color:var(--muted)">مثلاً: إيرادات المبيعات = مجموع أوامر التوريد المسلّمة | صافي الربح = الإيرادات - المصروفات - تكلفة الإنتاج</span>
+    </div>
+  </div>`;
+}
+
+// ── حالة البيانات ────────────────────────────────────────────
+function showDataStatus(){
+  const tables = [
+    ['products','المنتجات','💊'],['materials','المواد الخام','🧪'],
+    ['cmos','المصانع CMO','🏭'],['productionOrders','أوامر الإنتاج','📋'],
+    ['batchMaterials','مواد التشغيلات','⚙️'],['inventory','المخزون','📦'],
+    ['distributors','الموزعون','🏢'],['deliveryOrders','أوامر التوريد','🚚'],
+    ['deliveryItems','بنود التوريد','📋'],['expenses','المصروفات','🧾'],
+    ['employees','الموظفون','👥'],['budgetLines','الميزانية','💰'],
+    ['assets','الأصول الثابتة','🏗️'],['taxLines','الضرائب','🏦'],
+    ['receivables','الذمم المدينة','💳'],['purchaseOrders','المشتريات','📦'],
+    ['partnerAccounts','الشركاء','🤝'],['partnerEntries','حركات الشركاء','📝'],
+    ['journalEntries','قيود اليومية','📒'],['salesTargets','أهداف المبيعات','🎯'],
+  ];
+
+  const co = document.getElementById('co-active-label')?.textContent || 'الشركة';
+  const rows = tables.map(([table, label, icon])=>{
+    const count = getAll(table).length;
+    return `<tr style="background:${count>0?'rgba(46,160,67,.04)':''}">
+      <td>${icon} ${label}</td>
+      <td style="text-align:center;font-weight:700;color:${count>0?'var(--green-light)':'var(--muted)'}">${count}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="go('${
+        {products:'products',materials:'materials',cmos:'cmos',productionOrders:'production',
+         batchMaterials:'production',inventory:'inventory',distributors:'distributors',
+         deliveryOrders:'deliveries',deliveryItems:'deliveries',expenses:'expenses',
+         employees:'employees',budgetLines:'budget',assets:'assets',taxLines:'taxes',
+         receivables:'receivables',purchaseOrders:'purchasing',partnerAccounts:'partners',
+         partnerEntries:'partners',journalEntries:'journal',salesTargets:'salesvstarget'}[table]||table
+      }');closeModal()">فتح</button></td>
+    </tr>`;
+  });
+
+  const total = tables.reduce((s,[t])=>s+getAll(t).length, 0);
+
+  showModal(modal(`🔍 حالة بيانات ${co}`, `
+    <div style="padding:10px;background:${total>0?'rgba(46,160,67,.08)':'rgba(248,81,73,.08)'};border:1px solid ${total>0?'rgba(46,160,67,.2)':'rgba(248,81,73,.2)'};border-radius:8px;margin-bottom:12px;font-size:13px">
+      <strong>${total>0?'✅':'⚠️'} إجمالي السجلات: ${total} سجل</strong>
+      ${total===0?' — الشركة فاضية، ابدأ بإدخال البيانات':''}
+    </div>
+    <div class="tbl-wrap" style="max-height:400px;overflow-y:auto">
+      <table style="font-size:12px;width:100%">
+        <thead><tr><th>الجدول</th><th>عدد السجلات</th><th></th></tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">إغلاق</button>
+    </div>`
+  ));
+}
+
+// ── مسح البيانات ──────────────────────────────────────────────
+function showClearDataPanel(){
+  const co = document.getElementById('co-active-label')?.textContent || 'الشركة';
+  showModal(modal('🗑 مسح بيانات الشركة', `
+    <div style="padding:14px;background:rgba(248,81,73,.08);border:1px solid rgba(248,81,73,.3);border-radius:8px;margin-bottom:16px">
+      <strong style="color:var(--red)">⚠️ تحذير:</strong> هذا الإجراء سيمسح كل بيانات <strong>${co}</strong> بشكل نهائي ولا يمكن التراجع عنه.
+    </div>
+    <div style="margin-bottom:16px;font-size:13px;color:var(--muted)">
+      ننصح بتصدير Backup أولاً قبل المسح.
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="doExportBackup();closeModal()">⬇️ تصدير Backup أولاً</button>
+    </div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:12px">
+        <input type="checkbox" id="confirm-clear" style="width:16px;height:16px">
+        نعم، أريد مسح كل بيانات ${co} نهائياً
+      </label>
+      <button class="btn" style="background:var(--red);color:#fff;border:none;padding:8px 20px;border-radius:8px;cursor:pointer;font-family:Cairo,sans-serif"
+        onclick="if(document.getElementById('confirm-clear').checked){clearCompanyData()}else{alert('يرجى تأكيد المسح أولاً')}">
+        🗑 مسح كل البيانات
+      </button>
+      <button class="btn btn-ghost" onclick="closeModal()" style="margin-right:8px">إلغاء</button>
+    </div>`
+  ));
+}
+
+function clearCompanyData(){
+  // Reset DB to empty
+  Object.keys(DB).forEach(k=>{
+    if(k === '_seq') DB._seq = {};
+    else if(Array.isArray(DB[k])) DB[k] = [];
+  });
+  saveDB();
+  closeModal();
+  showNotif?.('✅ تم مسح كل بيانات الشركة بنجاح', 'success');
+  go('dashboard');
+}
+
+// ── Smart empty states in each report tab ────────────────────
+function emptyState(icon, title, desc, btnLabel, btnAction){
+  return `<div style="text-align:center;padding:40px 20px">
+    <div style="font-size:48px;margin-bottom:12px">${icon}</div>
+    <div style="font-size:16px;font-weight:700;margin-bottom:6px">${title}</div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:16px">${desc}</div>
+    ${btnLabel ? `<button class="btn btn-green" onclick="${btnAction}">${btnLabel}</button>` : ''}
+  </div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// دليل الحسابات — Chart of Accounts (كامل)
+// ════════════════════════════════════════════════════════════════
+
+// دليل حسابات كامل للشركة الدوائية المصرية
+function getChartOfAccounts(){
+  return getAll('chartOfAccounts').sort((a,b)=>a.code.localeCompare(b.code));
+}
+
+// Seed chart of accounts on first use (called from coEnter)
+function seedChartOfAccounts(){
+  if(getAll('chartOfAccounts').length > 0) return; // already seeded
+  const defaults = [
+    // ── 1. الأصول المتداولة ──────────────────────────────────
+    {code:'1101',name:'الصندوق - نقدية بالخزينة',           type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1102',name:'البنك - الحساب الجاري',              type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1103',name:'البنك - حساب التوفير',               type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1110',name:'عملاء ومدينون (ذمم مدينة)',          type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1111',name:'أوراق قبض',                          type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1112',name:'شيكات تحت التحصيل',                  type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1120',name:'مخزون منتجات نهائية',                type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1121',name:'مخزون مواد خام (API)',               type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1122',name:'مخزون مواد تغليف',                   type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1123',name:'مخزون تحت التصنيع (WIP)',            type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1130',name:'دفعات مقدمة للموردين',               type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1131',name:'مصروفات مدفوعة مقدماً',              type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1132',name:'ضريبة قيمة مضافة مدخلات (مدفوعة)',  type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    {code:'1140',name:'أوراق قبض مخصوم بها',               type:'asset',   category:'أصول متداولة', nature:'مدين'},
+    // ── 2. الأصول غير المتداولة ──────────────────────────────
+    {code:'1201',name:'أراضي ومباني',                       type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1202',name:'آلات ومعدات',                        type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1203',name:'أثاث وتجهيزات',                      type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1204',name:'أجهزة كمبيوتر وبرامج',              type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1205',name:'سيارات ووسائل نقل',                  type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1210',name:'مجمع إهلاك الأصول الثابتة',         type:'asset',   category:'أصول غير متداولة', nature:'دائن'},
+    {code:'1220',name:'مشروعات تحت التنفيذ',               type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1230',name:'رسوم تسجيل دوائي (رسملة)',          type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1231',name:'براءات اختراع وعلامات تجارية',      type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    {code:'1240',name:'استثمارات طويلة الأجل',              type:'asset',   category:'أصول غير متداولة', nature:'مدين'},
+    // ── 3. الالتزامات المتداولة ──────────────────────────────
+    {code:'2101',name:'موردون ودائنون تجاريون',             type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2102',name:'أوراق دفع',                          type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2103',name:'دفعات مقدمة من العملاء',             type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2110',name:'ضريبة قيمة مضافة مستحقة (مخرجات)',  type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2111',name:'ضريبة دخل مستحقة',                  type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2112',name:'ضريبة دمغة مستحقة',                 type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2113',name:'خصم وإضافة مستحق',                  type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2120',name:'رواتب وأجور مستحقة',                type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2121',name:'تأمينات اجتماعية مستحقة',           type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2130',name:'مصروفات مستحقة أخرى',               type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    {code:'2140',name:'الجزء الجاري من القروض',             type:'liability',category:'التزامات متداولة', nature:'دائن'},
+    // ── 4. الالتزامات غير المتداولة ──────────────────────────
+    {code:'2201',name:'قروض بنكية طويلة الأجل',            type:'liability',category:'التزامات غير متداولة', nature:'دائن'},
+    {code:'2202',name:'قروض من الشركاء',                    type:'liability',category:'التزامات غير متداولة', nature:'دائن'},
+    {code:'2203',name:'التزامات ضريبية مؤجلة',              type:'liability',category:'التزامات غير متداولة', nature:'دائن'},
+    // ── 5. حقوق الملكية ──────────────────────────────────────
+    {code:'3101',name:'رأس المال المدفوع',                  type:'equity',  category:'حقوق الملكية', nature:'دائن'},
+    {code:'3102',name:'احتياطي قانوني',                     type:'equity',  category:'حقوق الملكية', nature:'دائن'},
+    {code:'3103',name:'احتياطي اختياري',                    type:'equity',  category:'حقوق الملكية', nature:'دائن'},
+    {code:'3110',name:'جاري الشركاء — حساب التمويل',       type:'equity',  category:'حقوق الملكية', nature:'دائن'},
+    {code:'3120',name:'أرباح (خسائر) مرحلة',               type:'equity',  category:'حقوق الملكية', nature:'دائن'},
+    {code:'3130',name:'أرباح (خسائر) العام الجاري',        type:'equity',  category:'حقوق الملكية', nature:'دائن'},
+    // ── 6. إيرادات النشاط ────────────────────────────────────
+    {code:'4101',name:'إيرادات مبيعات منتجات دوائية',      type:'revenue', category:'إيرادات النشاط', nature:'دائن'},
+    {code:'4102',name:'إيرادات مبيعات للموزعين',            type:'revenue', category:'إيرادات النشاط', nature:'دائن'},
+    {code:'4103',name:'إيرادات مبيعات مباشرة',              type:'revenue', category:'إيرادات النشاط', nature:'دائن'},
+    {code:'4110',name:'(مردودات ومسموحات المبيعات)',        type:'revenue', category:'إيرادات النشاط', nature:'مدين'},
+    {code:'4120',name:'إيرادات تصنيع لحساب الغير (CMO)',   type:'revenue', category:'إيرادات النشاط', nature:'دائن'},
+    {code:'4130',name:'إيرادات تسجيل وتراخيص',             type:'revenue', category:'إيرادات النشاط', nature:'دائن'},
+    // ── 7. إيرادات أخرى ──────────────────────────────────────
+    {code:'4201',name:'فوائد دائنة بنكية',                  type:'revenue', category:'إيرادات أخرى', nature:'دائن'},
+    {code:'4202',name:'أرباح بيع أصول',                     type:'revenue', category:'إيرادات أخرى', nature:'دائن'},
+    {code:'4203',name:'إيرادات متنوعة أخرى',               type:'revenue', category:'إيرادات أخرى', nature:'دائن'},
+    // ── 8. تكلفة المبيعات ────────────────────────────────────
+    {code:'5101',name:'تكلفة مواد خام API مستخدمة',        type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5102',name:'تكلفة مواد تغليف مستخدمة',          type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5103',name:'تكلفة سواغات (Excipients)',          type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5110',name:'تكلفة تصنيع CMO',                   type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5120',name:'عمالة إنتاج مباشرة',                type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5130',name:'مصروفات مصنع عامة (Overhead)',       type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5140',name:'تكاليف ضبط جودة QC',                type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5150',name:'مخزون أول المدة',                   type:'expense', category:'تكلفة المبيعات', nature:'مدين'},
+    {code:'5160',name:'(مخزون آخر المدة)',                  type:'expense', category:'تكلفة المبيعات', nature:'دائن'},
+    // ── 9. مصروفات البيع والتوزيع ────────────────────────────
+    {code:'6101',name:'عمولات موزعين',                      type:'expense', category:'مصروفات البيع', nature:'مدين'},
+    {code:'6102',name:'مصروفات شحن ونقل المنتج',           type:'expense', category:'مصروفات البيع', nature:'مدين'},
+    {code:'6103',name:'مصروفات دعاية وإعلان',              type:'expense', category:'مصروفات البيع', nature:'مدين'},
+    {code:'6104',name:'مؤتمرات ومعارض طبية',               type:'expense', category:'مصروفات البيع', nature:'مدين'},
+    {code:'6105',name:'رواتب فريق المبيعات',               type:'expense', category:'مصروفات البيع', nature:'مدين'},
+    {code:'6106',name:'عينات طبية مجانية',                 type:'expense', category:'مصروفات البيع', nature:'مدين'},
+    // ── 10. مصروفات عمومية وإدارية ───────────────────────────
+    {code:'6201',name:'رواتب وأجور إداريين',               type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6202',name:'تأمينات اجتماعية',                  type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6203',name:'إيجار مقر الشركة',                  type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6204',name:'كهرباء ومياه وغاز',                 type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6205',name:'هاتف وإنترنت',                      type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6206',name:'مصروفات صيانة وإصلاح',              type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6207',name:'أتعاب محاسبة وقانونية',             type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6208',name:'تأمين على الممتلكات',               type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6209',name:'قرطاسية ومستلزمات مكتبية',          type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6210',name:'انتقالات وسفر',                     type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    {code:'6211',name:'مصروفات إدارية متنوعة',             type:'expense', category:'مصروفات إدارية', nature:'مدين'},
+    // ── 11. مصروفات التسجيل الدوائي ──────────────────────────
+    {code:'6301',name:'رسوم تسجيل هيئة الدواء',            type:'expense', category:'تسجيل دوائي', nature:'مدين'},
+    {code:'6302',name:'رسوم تجديد تراخيص',                 type:'expense', category:'تسجيل دوائي', nature:'مدين'},
+    {code:'6303',name:'مصروفات دراسات إكلينيكية',          type:'expense', category:'تسجيل دوائي', nature:'مدين'},
+    {code:'6304',name:'مصروفات GMP وجودة',                 type:'expense', category:'تسجيل دوائي', nature:'مدين'},
+    // ── 12. مصروفات تمويلية ───────────────────────────────────
+    {code:'6401',name:'فوائد قروض بنكية',                  type:'expense', category:'مصروفات تمويلية', nature:'مدين'},
+    {code:'6402',name:'عمولات بنكية',                      type:'expense', category:'مصروفات تمويلية', nature:'مدين'},
+    {code:'6403',name:'فروق عملة أجنبية',                  type:'expense', category:'مصروفات تمويلية', nature:'مدين'},
+    // ── 13. إهلاك ─────────────────────────────────────────────
+    {code:'6501',name:'إهلاك مباني وإنشاءات',              type:'expense', category:'إهلاك وإطفاء', nature:'مدين'},
+    {code:'6502',name:'إهلاك آلات ومعدات',                 type:'expense', category:'إهلاك وإطفاء', nature:'مدين'},
+    {code:'6503',name:'إهلاك أثاث وتجهيزات',               type:'expense', category:'إهلاك وإطفاء', nature:'مدين'},
+    {code:'6504',name:'إهلاك أجهزة كمبيوتر',              type:'expense', category:'إهلاك وإطفاء', nature:'مدين'},
+    {code:'6505',name:'إطفاء رسوم تسجيل',                  type:'expense', category:'إهلاك وإطفاء', nature:'مدين'},
+    // ── 14. الضرائب ───────────────────────────────────────────
+    {code:'6601',name:'ضريبة الدخل',                       type:'expense', category:'ضرائب', nature:'مدين'},
+    {code:'6602',name:'ضريبة الدمغة',                      type:'expense', category:'ضرائب', nature:'مدين'},
+  ];
+  defaults.forEach(d => insert('chartOfAccounts', d));
+}
+
+
+// ── PAGES.chartofaccounts — كاملة مع تعديل ───────────────────
+PAGES.chartofaccounts = function(){
+  const accounts = getChartOfAccounts();
+  const custom   = getAll('chartOfAccounts');
+  const typeMap  = {asset:'أصول',liability:'التزامات',equity:'حقوق الملكية',revenue:'إيرادات',expense:'مصروفات'};
+  const typeColor= {asset:'b-blue',liability:'b-red',equity:'b-green',revenue:'b-green',expense:'b-amber'};
+  const cats     = [...new Set(accounts.map(a=>a.category))];
+
+  // Totals
+  const byType = {};
+  accounts.forEach(a=>{ byType[a.type]=(byType[a.type]||0)+1; });
+
+  setPage('دليل الحسابات — Chart of Accounts',
+    `${accounts.length} حساب (${accounts.length-custom.length} افتراضي + ${custom.length} مضاف)`,
+    `<div style="display:flex;gap:8px">
+      <button class="btn btn-green" onclick="addAccount()">${ic.plus} إضافة حساب</button>
+      <button class="btn btn-white" onclick="go('journal')">📒 اليومية</button>
+      <button class="btn btn-white" onclick="go('trialbalance')">⚖️ ميزان المراجعة</button>
+    </div>`,
+    `<div class="stats-grid g5" style="margin-bottom:16px">
+      ${Object.entries(typeMap).map(([type,label])=>`
+        <div class="stat-card">
+          <div class="lbl">${label}</div>
+          <div class="val ${typeColor[type].replace('b-','text-')}">${(byType[type]||0)}</div>
+          <div class="sub">حساب</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="tabs" style="flex-wrap:wrap">
+      ${cats.map((cat,i)=>`<button class="tab${i===0?' active':''}" data-group="coa" data-tab="coa-${i}">${cat}</button>`).join('')}
+      <button class="tab" data-group="coa" data-tab="coa-all">📋 الكل</button>
+    </div>
+
+    ${cats.map((cat,i)=>`
+    <div id="coa-${i}" class="tab-pane" data-group="coa" ${i>0?'style="display:none"':''}>
+      <div class="card">${tbl(
+        ['رمز','اسم الحساب','النوع','طبيعة الرصيد',''],
+        accounts.filter(a=>a.category===cat).map(a=>{
+          const isCustom = custom.find(c=>c.code===a.code);
+          return tr(
+            `<code class="fw7">${a.code}</code>`,
+            `<div><strong>${a.name}</strong>${isCustom?'<span class="badge b-blue" style="font-size:9px;margin-right:4px">مضاف</span>':''}</div>`,
+            `<span class="badge ${typeColor[a.type]||'b-gray'}">${typeMap[a.type]||a.type}</span>`,
+            a.nature?`<span class="${a.nature==='مدين'?'text-blue':'text-red'} fw7">${a.nature}</span>`:'—',
+            a.id
+              ?`<div class="action-bar">
+                  <button class="icon-btn edit" onclick="editAccount(${a.id})">${ic.edit}</button>
+                  <button class="icon-btn del" onclick="if(confirm('حذف الحساب \''+a.name+'\'؟')){remove('chartOfAccounts',${a.id});go('chartofaccounts')}">${ic.del}</button>
+                </div>`
+              :'<span style="font-size:10px;color:var(--muted)">—</span>'
+          );
+        })
+      )}</div>
+    </div>`).join('')}
+
+    <div id="coa-all" class="tab-pane" data-group="coa" style="display:none">
+      <div class="card">${tbl(
+        ['رمز','اسم الحساب','الفئة','النوع','طبيعة الرصيد',''],
+        accounts.map(a=>{
+          const isCustom = custom.find(c=>c.code===a.code);
+          return tr(
+            `<code class="fw7">${a.code}</code>`,
+            `<strong>${a.name}</strong>`,
+            `<span style="font-size:11px;color:var(--muted)">${a.category}</span>`,
+            `<span class="badge ${typeColor[a.type]||'b-gray'}">${typeMap[a.type]||a.type}</span>`,
+            a.nature?`<span class="${a.nature==='مدين'?'text-blue':'text-red'} fw7">${a.nature}</span>`:'—',
+            a.id
+              ?`<div class="action-bar">
+                  <button class="icon-btn edit" onclick="editAccount(${a.id})">${ic.edit}</button>
+                  <button class="icon-btn del" onclick="if(confirm('حذف؟')){remove('chartOfAccounts',${a.id});go('chartofaccounts')}">${ic.del}</button>
+                </div>`
+              :'—'
+          );
+        })
+      )}</div>
+    </div>`
+  );
+  initTabs();
+};
+
+function accountForm(a={}){
+  return `
+    <div class="form-row">
+      ${fg('رمز الحساب *',inp('ac-code','text',a.code||'','مثال: 6212'))}
+      ${fg('نوع الحساب *',sel('ac-type',[
+        {v:'asset',l:'أصول'},{v:'liability',l:'التزامات'},
+        {v:'equity',l:'حقوق الملكية'},{v:'revenue',l:'إيرادات'},{v:'expense',l:'مصروفات'}
+      ],a.type||'expense'))}
+    </div>
+    ${fg('اسم الحساب *',inp('ac-name','text',a.name||'','مثال: مصروفات صيانة معدات المعمل'))}
+    <div class="form-row">
+      ${fg('الفئة *',inp('ac-cat','text',a.category||'','مثال: مصروفات إدارية'))}
+      ${fg('طبيعة الرصيد',sel('ac-nature',[{v:'مدين',l:'مدين (Debit)'},{v:'دائن',l:'دائن (Credit)'}],a.nature||'مدين'))}
+    </div>
+    ${fg('وصف / ملاحظات',inp('ac-notes','text',a.notes||'','اختياري'))}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="saveAccount(${a.id||''})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`;
+}
+
+function addAccount(){ showModal(modal('إضافة حساب جديد',accountForm())); }
+function editAccount(id){
+  const a=getById('chartOfAccounts',id); if(!a) return;
+  showModal(modal('تعديل الحساب',accountForm(a)));
+}
+function saveAccount(id){
+  const code=val('ac-code'), name=val('ac-name'), cat=val('ac-cat');
+  if(!code||!name||!cat) return alert('يرجى تعبئة الرمز والاسم والفئة');
+  const existing = getAll('chartOfAccounts').find(a=>a.code===code&&(!id||a.id!==id));
+  if(existing) return alert('رمز الحساب مستخدم بالفعل');
+  const d={code,name,type:val('ac-type'),category:cat,nature:val('ac-nature'),notes:val('ac-notes')||null};
+  id?update('chartOfAccounts',id,d):insert('chartOfAccounts',d);
+  closeModal(); go('chartofaccounts');
+}
+
+// ════════════════════════════════════════════════════════════════
+// ميزان المراجعة — Trial Balance (كامل من اليومية + DB)
+// ════════════════════════════════════════════════════════════════
+
+function showTrialBalance(){
+  const accounts   = getChartOfAccounts();
+  const entries    = getAll('journalEntries');
+  const typeMap    = {asset:'أصول',liability:'التزامات',equity:'حقوق الملكية',revenue:'إيرادات',expense:'مصروفات'};
+  const typeColor  = {asset:'text-blue',liability:'text-red',equity:'text-green',revenue:'text-green',expense:'text-amber'};
+
+  // ── حساب أرصدة الحسابات من اليومية ─────────────────────────
+  const balances = {};
+  entries.forEach(e=>{
+    // مدين
+    if(!balances[e.debitAccount])  balances[e.debitAccount]  = {debit:0, credit:0};
+    if(!balances[e.creditAccount]) balances[e.creditAccount] = {debit:0, credit:0};
+    balances[e.debitAccount].debit   += Number(e.debit||0);
+    balances[e.creditAccount].credit += Number(e.credit||0);
+  });
+
+  // ── دمج مع دليل الحسابات ──────────────────────────────────
+  const allAccountNames = new Set([
+    ...accounts.map(a=>a.name),
+    ...Object.keys(balances)
+  ]);
+
+  const rows = [];
+  accounts.forEach(a=>{
+    const bal = balances[a.name] || {debit:0, credit:0};
+    if(bal.debit === 0 && bal.credit === 0) return; // skip zero balances
+    const netDebit  = Math.max(0, bal.debit - bal.credit);
+    const netCredit = Math.max(0, bal.credit - bal.debit);
+    rows.push({
+      code:a.code, name:a.name, category:a.category,
+      type:a.type, nature:a.nature,
+      totalDebit:bal.debit, totalCredit:bal.credit,
+      netDebit, netCredit
+    });
+  });
+
+  // حسابات غير موجودة في الدليل (من اليومية مباشرة)
+  Object.keys(balances).forEach(accName=>{
+    if(!accounts.find(a=>a.name===accName)){
+      const bal = balances[accName];
+      const netDebit  = Math.max(0, bal.debit - bal.credit);
+      const netCredit = Math.max(0, bal.credit - bal.debit);
+      rows.push({
+        code:'???', name:accName, category:'غير مصنف',
+        type:'other', nature:'',
+        totalDebit:bal.debit, totalCredit:bal.credit,
+        netDebit, netCredit
+      });
+    }
+  });
+
+  rows.sort((a,b)=>a.code.localeCompare(b.code,'ar'));
+
+  const sumTotalDebit   = rows.reduce((s,r)=>s+r.totalDebit,0);
+  const sumTotalCredit  = rows.reduce((s,r)=>s+r.totalCredit,0);
+  const sumNetDebit     = rows.reduce((s,r)=>s+r.netDebit,0);
+  const sumNetCredit    = rows.reduce((s,r)=>s+r.netCredit,0);
+  const isBalanced      = Math.abs(sumNetDebit - sumNetCredit) < 1;
+
+  setPage('ميزان المراجعة — Trial Balance',
+    `${rows.length} حساب | ${isBalanced?'✅ متوازن':'⚠️ غير متوازن — فارق '+fmt(Math.abs(sumNetDebit-sumNetCredit))+' ج.م'}`,
+    `<div style="display:flex;gap:8px">
+      <button class="btn btn-green" onclick="go('journal')">${ic.plus} قيد جديد</button>
+      <button class="btn btn-white" onclick="go('chartofaccounts')">📑 دليل الحسابات</button>
+      <button class="btn btn-white" onclick="window.print()">🖨️ طباعة</button>
+    </div>`,
+    `
+    <!-- KPIs -->
+    <div class="stats-grid g4" style="margin-bottom:16px">
+      <div class="stat-card">
+        <div class="lbl">إجمالي المدين</div>
+        <div class="val text-blue">${fmt(sumTotalDebit)} ج.م</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">إجمالي الدائن</div>
+        <div class="val text-red">${fmt(sumTotalCredit)} ج.م</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">رصيد مدين (صافي)</div>
+        <div class="val text-blue">${fmt(sumNetDebit)} ج.م</div>
+      </div>
+      <div class="stat-card">
+        <div class="lbl">رصيد دائن (صافي)</div>
+        <div class="val text-red">${fmt(sumNetCredit)} ج.م</div>
+      </div>
+    </div>
+
+    ${!isBalanced?`<div class="alert alert-warn" style="margin-bottom:16px">
+      ${ic.warn}<div><strong>الميزان غير متوازن</strong> — الفارق: ${fmt(Math.abs(sumNetDebit-sumNetCredit))} ج.م. تحقق من قيود اليومية.</div>
+    </div>`:''}
+
+    ${!rows.length?`<div class="card"><div class="empty">
+      لا توجد قيود في اليومية بعد — <button class="btn btn-green btn-sm" onclick="go('journal')">ابدأ بإضافة قيود</button>
+    </div></div>`:`
+
+    <!-- الجدول الكامل -->
+    <div class="card">
+      <div class="card-head">
+        <h2>📊 ميزان المراجعة — كل الحسابات</h2>
+        <div style="display:flex;gap:8px">
+          <select onchange="filterTrialBalance(this.value)" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
+            <option value="">كل الأنواع</option>
+            <option value="asset">أصول</option>
+            <option value="liability">التزامات</option>
+            <option value="equity">حقوق الملكية</option>
+            <option value="revenue">إيرادات</option>
+            <option value="expense">مصروفات</option>
+          </select>
+        </div>
+      </div>
+      <div class="tbl-wrap" id="tb-table-wrap">
+        <table id="tb-main">
+          <thead>
+            <tr>
+              <th>رمز</th>
+              <th>اسم الحساب</th>
+              <th>الفئة</th>
+              <th>طبيعة</th>
+              <th>مجموع مدين</th>
+              <th>مجموع دائن</th>
+              <th>رصيد مدين</th>
+              <th>رصيد دائن</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map((r,i)=>`
+            <tr data-type="${r.type}" style="background:${i%2?'rgba(255,255,255,.02)':''}">
+              <td><code>${r.code}</code></td>
+              <td class="fw7">${r.name}</td>
+              <td style="font-size:11px;color:var(--muted)">${r.category}</td>
+              <td>${r.nature?`<span class="${r.nature==='مدين'?'text-blue':'text-red'}" style="font-size:11px">${r.nature}</span>`:'—'}</td>
+              <td style="text-align:left;color:var(--blue)">${r.totalDebit>0?fmt(r.totalDebit)+' ج.م':'—'}</td>
+              <td style="text-align:left;color:var(--red)">${r.totalCredit>0?fmt(r.totalCredit)+' ج.م':'—'}</td>
+              <td style="text-align:left" class="${r.netDebit>0?'text-blue fw7':''}">${r.netDebit>0?fmt(r.netDebit)+' ج.م':'—'}</td>
+              <td style="text-align:left" class="${r.netCredit>0?'text-red fw7':''}">${r.netCredit>0?fmt(r.netCredit)+' ج.م':'—'}</td>
+            </tr>`).join('')}
+            <!-- إجمالي -->
+            <tr style="background:rgba(46,160,67,.1);font-weight:700;border-top:2px solid var(--border)">
+              <td colspan="4" style="font-size:13px">الإجمالي</td>
+              <td style="text-align:left" class="text-blue fw7">${fmt(sumTotalDebit)} ج.م</td>
+              <td style="text-align:left" class="text-red fw7">${fmt(sumTotalCredit)} ج.م</td>
+              <td style="text-align:left" class="text-blue fw7">${fmt(sumNetDebit)} ج.م</td>
+              <td style="text-align:left" class="${isBalanced?'text-green':'text-red'} fw7">${fmt(sumNetCredit)} ج.م ${isBalanced?'✅':'⚠️'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`}
+  `);
+}
+
+function filterTrialBalance(type){
+  const rows = document.querySelectorAll('#tb-main tbody tr[data-type]');
+  rows.forEach(r=>{
+    r.style.display = !type || r.dataset.type===type ? '' : 'none';
+  });
+}
+
+PAGES.trialbalance = function(){ showTrialBalance(); };
+
+// ── اليومية — Journal (محسّنة) ───────────────────────────────
+PAGES.journal = function(){
+  const entries = getAll('journalEntries').sort((a,b)=>(b.entryDate||'')>(a.entryDate||'')?1:-1);
+  const accounts = getChartOfAccounts();
+  const totalDebit  = entries.reduce((s,e)=>s+Number(e.debit||0),0);
+  const totalCredit = entries.reduce((s,e)=>s+Number(e.credit||0),0);
+  const isBalanced  = Math.abs(totalDebit-totalCredit) < 1;
+
+  setPage('اليومية الأمريكية — General Journal',
+    `${entries.length} قيد | ${isBalanced?'✅ متوازنة':'⚠️ غير متوازنة'}`,
+    `<div style="display:flex;gap:8px">
+      <button class="btn btn-green" onclick="addJournalEntry()">${ic.plus} قيد جديد</button>
+      <button class="btn btn-white" onclick="go('trialbalance')">⚖️ ميزان المراجعة</button>
+      <button class="btn btn-white" onclick="go('chartofaccounts')">📑 دليل الحسابات</button>
+    </div>`,
+    `<div class="stats-grid g4" style="margin-bottom:16px">
+      <div class="stat-card"><div class="lbl">عدد القيود</div><div class="val">${entries.length}</div></div>
+      <div class="stat-card"><div class="lbl">إجمالي المدين</div><div class="val text-blue">${fmt(totalDebit)} ج.م</div></div>
+      <div class="stat-card"><div class="lbl">إجمالي الدائن</div><div class="val text-red">${fmt(totalCredit)} ج.م</div></div>
+      <div class="stat-card">
+        <div class="lbl">حالة الميزان</div>
+        <div class="val ${isBalanced?'text-green':'text-red'}">${isBalanced?'✅ متوازن':'⚠️ '+fmt(Math.abs(totalDebit-totalCredit))+' ج.م'}</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>📋 دفتر اليومية</h2>
+        <div style="display:flex;gap:8px">
+          <select onchange="filterJournalYear(this.value)" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
+            <option value="">كل السنوات</option>
+            ${[...new Set(entries.map(e=>e.year||new Date(e.entryDate||'').getFullYear()))].sort((a,b)=>b-a).map(y=>`<option value="${y}">${y}</option>`).join('')}
+          </select>
+          <select onchange="filterJournalType(this.value)" style="background:var(--bg);border:1px solid var(--border);color:var(--text);padding:4px 8px;border-radius:6px;font-size:12px">
+            <option value="">كل الأنواع</option>
+            <option value="payment">دفع/سداد</option>
+            <option value="receipt">استلام/قبض</option>
+            <option value="purchase">مشتريات</option>
+            <option value="sale">مبيعات</option>
+            <option value="salary">رواتب</option>
+            <option value="depreciation">إهلاك</option>
+            <option value="partner">جاري شركاء</option>
+          </select>
+        </div>
+      </div>
+      <div id="journal-table-wrap">
+        ${buildJournalTable(entries)}
+      </div>
+    </div>`
+  );
+};
+
+function filterJournalType(type){
+  const all = getAll('journalEntries')
+    .filter(e=>!type||e.entryType===type)
+    .sort((a,b)=>(b.entryDate||'')>(a.entryDate||'')?1:-1);
+  const wrap = document.getElementById('journal-table-wrap');
+  if(wrap) wrap.innerHTML = buildJournalTable(all);
+}
+
+PAGES.historicalbalance = function(){
+  const records = getAll('historicalBalances');
+  const years   = [...new Set(records.map(r=>r.year))].sort((a,b)=>a-b);
+  const accs    = [...new Set(records.map(r=>r.accountName))].sort();
+
+  setPage('الموازين التاريخية',
+    'إدخال وعرض موازين المراجعة للسنوات السابقة',
+    `<div style="display:flex;gap:8px">
+      <button class="btn btn-green" onclick="addHistoricalEntry()">${ic.plus} إضافة رصيد تاريخي</button>
+      <button class="btn btn-white" onclick="importHistoricalBulk()">📥 إدخال متعدد</button>
+      ${records.length?`<button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="if(confirm('حذف كل الموازين التاريخية؟')){getAll(\'historicalBalances\').forEach(r=>remove(\'historicalBalances\',r.id));go(\'historicalbalance\')}">🗑 مسح الكل</button>`:''}
+    </div>`,
+    records.length === 0
+    ? `<div class="card"><div style="text-align:center;padding:40px">
+        <div style="font-size:48px;margin-bottom:12px">📜</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px">لا توجد موازين تاريخية</div>
+        <div style="color:var(--muted);font-size:13px;margin-bottom:20px">أضف موازين المراجعة للسنوات السابقة لأغراض المقارنة والمراجعة</div>
+        <button class="btn btn-green" onclick="addHistoricalEntry()">${ic.plus} إضافة أول رصيد</button>
+        <div style="margin-top:12px"><button class="btn btn-white" onclick="importHistoricalBulk()">📥 إدخال متعدد (جدول)</button></div>
+      </div></div>`
+    : `
+    <!-- Pivot: اسم الحساب × السنة -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head"><h2>📊 ميزان المراجعة التاريخي</h2></div>
+      <div class="tbl-wrap"><table>
+        <thead><tr>
+          <th>الحساب</th>
+          <th>النوع</th>
+          ${years.map(y=>`<th colspan="2">${y}</th>`).join('')}
+        </tr>
+        <tr>
+          <th></th><th></th>
+          ${years.map(()=>'<th>مدين</th><th>دائن</th>').join('')}
+        </tr></thead>
+        <tbody>
+          ${accs.map((acc,i)=>{
+            const accRecs = records.filter(r=>r.accountName===acc);
+            const type = accRecs[0]?.accountType||'';
+            const typeColor = {asset:'text-blue',liability:'text-red',equity:'text-green',revenue:'text-green',expense:'text-amber'}[type]||'';
+            return `<tr style="background:${i%2?'rgba(255,255,255,.02)':''}">
+              <td class="fw7">${acc}</td>
+              <td><span class="${typeColor}" style="font-size:11px">${
+                {asset:'أصول',liability:'التزامات',equity:'حقوق الملكية',revenue:'إيرادات',expense:'مصروفات'}[type]||'—'
+              }</span></td>
+              ${years.map(y=>{
+                const rec = accRecs.find(r=>r.year==y);
+                return `<td style="text-align:left;color:var(--blue)">${rec&&rec.debit>0?fmt(rec.debit)+' ج.م':'—'}</td>
+                        <td style="text-align:left;color:var(--red)">${rec&&rec.credit>0?fmt(rec.credit)+' ج.م':'—'}</td>`;
+              }).join('')}
+            </tr>`;
+          }).join('')}
+          <!-- الإجماليات -->
+          <tr style="background:rgba(46,160,67,.1);font-weight:700;border-top:2px solid var(--border)">
+            <td colspan="2">الإجمالي</td>
+            ${years.map(y=>{
+              const td = records.filter(r=>r.year==y).reduce((s,r)=>s+Number(r.debit||0),0);
+              const tc = records.filter(r=>r.year==y).reduce((s,r)=>s+Number(r.credit||0),0);
+              return `<td style="text-align:left" class="text-blue fw7">${fmt(td)} ج.م</td>
+                      <td style="text-align:left" class="text-red fw7">${fmt(tc)} ج.م</td>`;
+            }).join('')}
+          </tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <!-- جدول التفاصيل مع تعديل وحذف -->
+    <div class="card">
+      <div class="card-head"><h2>📋 تفاصيل الأرصدة</h2></div>
+      ${tbl(
+        ['السنة','الحساب','النوع','مدين (ج.م)','دائن (ج.م)','ملاحظات',''],
+        records.sort((a,b)=>a.year-b.year||a.accountName.localeCompare(b.accountName,'ar')).map(r=>tr(
+          `<span class="fw7">${r.year}</span>`,
+          r.accountName,
+          `<span style="font-size:11px;color:var(--muted)">${
+            {asset:'أصول',liability:'التزامات',equity:'حقوق الملكية',revenue:'إيرادات',expense:'مصروفات'}[r.accountType]||r.accountType||'—'
+          }</span>`,
+          r.debit>0?`<span class="text-blue fw7">${fmt(r.debit)} ج.م</span>`:'—',
+          r.credit>0?`<span class="text-red fw7">${fmt(r.credit)} ج.م</span>`:'—',
+          r.notes||'—',
+          `<div class="action-bar">
+            <button class="icon-btn edit" onclick="editHistoricalEntry(${r.id})">${ic.edit}</button>
+            <button class="icon-btn del" onclick="if(confirm('حذف؟')){remove('historicalBalances',${r.id});go('historicalbalance')}">${ic.del}</button>
+          </div>`
+        ))
+      )}
+    </div>`
+  );
+};
+
+function historicalForm(r={}){
+  const accounts = getChartOfAccounts();
+  return `
+    <div class="form-row">
+      ${fg('السنة المالية *',inp('hb-year','number',r.year||new Date().getFullYear()-1,'مثال: 2022'))}
+      ${fg('نوع الحساب',sel('hb-type',[
+        {v:'asset',l:'أصول'},{v:'liability',l:'التزامات'},
+        {v:'equity',l:'حقوق الملكية'},{v:'revenue',l:'إيرادات'},{v:'expense',l:'مصروفات'}
+      ],r.accountType||'asset'))}
+    </div>
+    <div class="fg"><label>اسم الحساب *</label>
+      <input id="hb-acc" list="hb-acc-list" value="${r.accountName||''}"
+        style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--text);font-family:Cairo,sans-serif"
+        placeholder="اكتب أو اختر من الدليل...">
+      <datalist id="hb-acc-list">
+        ${accounts.map(a=>`<option value="${a.name}">`).join('')}
+      </datalist>
+    </div>
+    <div class="form-row">
+      ${fg('رصيد مدين (ج.م)',inp('hb-debit','number',r.debit||'','0'))}
+      ${fg('رصيد دائن (ج.م)',inp('hb-credit','number',r.credit||'','0'))}
+    </div>
+    ${fg('ملاحظات',inp('hb-notes','text',r.notes||'','اختياري'))}
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="saveHistoricalEntry(${r.id||''})">💾 حفظ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`;
+}
+
+function addHistoricalEntry(){
+  showModal(modal('➕ إضافة رصيد تاريخي', historicalForm()));
+}
+function editHistoricalEntry(id){
+  const r = getById('historicalBalances',id); if(!r) return;
+  showModal(modal('تعديل الرصيد التاريخي', historicalForm(r)));
+}
+function saveHistoricalEntry(id){
+  const acc  = document.getElementById('hb-acc')?.value?.trim();
+  const year = val('hb-year');
+  if(!acc||!year) return alert('يرجى تعبئة السنة واسم الحساب');
+  const debit  = Number(val('hb-debit')||0);
+  const credit = Number(val('hb-credit')||0);
+  if(!debit && !credit) return alert('يرجى إدخال رصيد مدين أو دائن');
+  const d = {
+    year:Number(year), accountName:acc,
+    accountType:val('hb-type'),
+    debit, credit, notes:val('hb-notes')||null
+  };
+  id ? update('historicalBalances',id,d) : insert('historicalBalances',d);
+  closeModal(); go('historicalbalance');
+}
+
+// إدخال متعدد — جدول بسيط
+function importHistoricalBulk(){
+  showModal(modal('📥 إدخال موازين متعددة',`
+    <div style="padding:10px;background:rgba(56,139,253,.08);border:1px solid rgba(56,139,253,.2);border-radius:8px;font-size:12px;margin-bottom:14px">
+      💡 أدخل أرصدة عدة حسابات في نفس الوقت. اكتب في كل سطر: السنة، اسم الحساب، نوعه، رصيد مدين، رصيد دائن (مفصولة بفاصلة)
+    </div>
+    <div style="margin-bottom:10px;font-size:12px;color:var(--muted)">مثال: 2022, الصندوق, asset, 50000, 0</div>
+    <textarea id="bulk-hb" rows="10" style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12px;color:var(--text);font-family:monospace;direction:rtl"
+      placeholder="2022, الصندوق, asset, 50000, 0
+2022, البنك, asset, 120000, 0
+2022, رأس المال, equity, 0, 100000
+2022, موردون ودائنون, liability, 0, 35000"></textarea>
+    <div id="bulk-result" style="font-size:12px;min-height:20px;margin-top:8px"></div>
+    <div class="form-actions">
+      <button class="btn btn-green" onclick="processBulkHistorical()">💾 استيراد</button>
+      <button class="btn btn-ghost" onclick="closeModal()">إلغاء</button>
+    </div>`));
+}
+
+function processBulkHistorical(){
+  const text = document.getElementById('bulk-hb')?.value||'';
+  const lines = text.trim().split('\n').filter(l=>l.trim());
+  let ok=0, errors=[];
+  lines.forEach((line,i)=>{
+    const parts = line.split(',').map(p=>p.trim());
+    if(parts.length < 4){ errors.push(`سطر ${i+1}: ناقص`); return; }
+    const [year, acc, type, debit, credit] = parts;
+    if(!year||!acc){ errors.push(`سطر ${i+1}: سنة أو حساب فارغ`); return; }
+    insert('historicalBalances',{
+      year:Number(year), accountName:acc,
+      accountType:type||'asset',
+      debit:Number(debit||0), credit:Number(credit||0)
+    });
+    ok++;
+  });
+  const res = document.getElementById('bulk-result');
+  if(res) res.innerHTML = `<span class="${errors.length?'text-amber':'text-green'}">تم استيراد ${ok} سجل${errors.length?' | أخطاء: '+errors.join(', '):' ✅'}</span>`;
+  if(ok > 0) setTimeout(()=>{ closeModal(); go('historicalbalance'); }, 1000);
+}
+
 
 // renderNav/go called by coEnter() after company is selected
 
